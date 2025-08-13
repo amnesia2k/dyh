@@ -1,0 +1,40 @@
+services:
+  # web:
+  #   depends_on:
+  #     - api
+  #   build:
+  #     context: ./client
+  #   ports:
+  #     - 5173:5173
+  #   environment:
+  #     - VITE_API_BASE_URL=http://localhost:8000/api/v1
+  #   volumes:
+  #     - ./client:/app
+  #     # - /app/node_modules # this keeps host from overriding container modules
+  #   command: pnpm dev # this will run vite
+  api:
+    depends_on:
+      - db
+    build:
+      context: ./server
+    ports:
+      - 8000:8000
+    environment:
+      - NODE_ENV=development
+      - DB_URL=mongodb://db/dyhdb
+      - JWT_SECRET=f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - ./server:/app
+      # - /app/node_modules # this keeps host from overriding container modules
+    command: pnpm dev # this will run nodemon
+
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - dyhdb:/data/db
+
+volumes:
+  dyhdb:

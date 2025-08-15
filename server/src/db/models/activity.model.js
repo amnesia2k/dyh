@@ -23,7 +23,7 @@ const ActivityLogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
     },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: true, versionKey: false }
 );
 
 ActivityLogSchema.index({ createdAt: -1 });

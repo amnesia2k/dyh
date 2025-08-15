@@ -36,7 +36,7 @@ const MemberSchema = new mongoose.Schema(
       default: () => new Date(),
     },
 
-    tags: [String],
+    // tags: [String],
 
     photo: String,
 
@@ -44,7 +44,7 @@ const MemberSchema = new mongoose.Schema(
     //   type: String, ref: "User"
     // }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 MemberSchema.index({ fullName: "text", email: "text", phone: "text" });

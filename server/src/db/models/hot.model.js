@@ -28,10 +28,10 @@ const HotSchema = new mongoose.Schema(
 
     // createdBy: { type: String, ref: "User" },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-HotSchema.index({ name: "text", department: "text" });
+HotSchema.index({ name: "text", tribe: "text" });
 
 export const HeadOfTribe =
   mongoose.models.HeadOfTribe || mongoose.model("HeadOfTribe", HotSchema);

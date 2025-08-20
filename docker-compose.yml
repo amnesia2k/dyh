@@ -1,40 +1,246 @@
 services:
-  # web:
-  #   depends_on:
-  #     - api
-  #   build:
-  #     context: ./client
-  #   ports:
-  #     - 5173:5173
-  #   environment:
-  #     - VITE_API_BASE_URL=http://localhost:8000/api/v1
-  #   volumes:
-  #     - ./client:/app
-  #     # - /app/node_modules # this keeps host from overriding container modules
-  #   command: pnpm dev # this will run vite
-  api:
-    depends_on:
-      - db
-    build:
-      context: ./server
-    ports:
-      - 8000:8000
-    environment:
-      - NODE_ENV=development
-      - DB_URL=mongodb://db/dyhdb
-      - JWT_SECRET=f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
-      - FRONTEND_URL=http://localhost:3000
-    volumes:
-      - ./server:/app
-      # - /app/node_modules # this keeps host from overriding container modules
-    command: pnpm dev # this will run nodemon
-
+  # -------------------
+  # MongoDB: database
+  # -------------------
   db:
     image: mongo:latest
+    container_name: dyh-mongo
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
       - dyhdb:/data/db
+    # Optional healthcheck
+    # healthcheck:
+    #   test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 5
+
+  # -------------------
+  # Redis: cache & rate-limiter
+  # -------------------
+  redis:
+    image: redis:latest
+    container_name: dyh-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    # Optional healthcheck
+    # healthcheck:
+    #   test: ["CMD", "redis-cli", "ping"]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 3
+
+  # -------------------
+  # Backend: Express / API
+  # -------------------
+  api:
+    build: ./server
+    container_name: dyh-api
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    environment:
+      NODE_ENV: development
+      DB_URL: mongodb://db/dyhdb
+      JWT_SECRET: f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
+      FRONTEND_URL: http://localhost:3000
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_TLS: "false"
+    volumes:
+      - ./server:/app
+      # - /app/node_modules # keep host from overriding container modules
+    command: pnpm dev # runs nodemon
+
+  # -------------------
+  # Frontend: Vite (commented for now)
+  # -------------------
+  web:
+    build: ./client
+    container_name: dyh-web
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+      VITE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    volumes:
+      - ./client:/app
+      # - /app/node_modules # keep host from overriding container modules
+    command: pnpm dev # runs vite
+
+  # -------------------
+  # Redis Commander: GUI for Redis
+  # -------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: dyh-redis-commander
+    depends_on:
+      - redis
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+
+  # -------------------
+  # Mongo Express: GUI for MongoDB
+  # -------------------
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: dyh-mongo-express
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8082:8081" # mapped to 8082 locally
+    environment:
+      ME_CONFIG_MONGODB_SERVER: db
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: secret
+      ME_CONFIG_MONGODB_AUTH_DATABASE: dyhdb
 
 volumes:
   dyhdb:
+  redisdata:
+# Postgres Example Config
+
+# services:
+#   # -------------------
+#   # Postgres: database
+#   # -------------------
+#   db:
+#     image: postgres:16
+#     container_name: gempire-db
+#     ports:
+#       - "5432:5432"
+#     environment:
+#       POSTGRES_DB: gempire
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: mypostgrespassword
+#     volumes:
+#       - gempire:/var/lib/postgresql/data
+#     # Optional healthcheck
+#     # healthcheck:
+#     #   test: ["CMD-SHELL", "pg_isready -U postgres"]
+#     #   interval: 5s
+#     #   timeout: 3s
+#     #   retries: 5
+
+#   # -------------------
+#   # Redis: cache & rate-limiter
+#   # -------------------
+#   redis:
+#     image: redis:7
+#     container_name: gempire-redis
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redisdata:/data
+#     # Optional healthcheck
+#     # healthcheck:
+#     #   test: ["CMD", "redis-cli", "ping"]
+#     #   interval: 5s
+#     #   timeout: 3s
+#     #   retries: 3
+
+#   # -------------------
+#   # Backend: Express / API
+#   # -------------------
+#   api:
+#     build: ./gempire-server
+#     container_name: gempire-api
+#     depends_on:
+#       - db
+#       - redis
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       PORT: "8000"
+#       DATABASE_URL: "postgresql://postgres:mypostgrespassword@db:5432/gempire"
+#       JWT_SECRET: "gempireisthebestperfumerieandgeneralscentsbrand"
+#       CLOUDINARY_CLOUD_NAME: "dszmrtmyk"
+#       CLOUDINARY_API_KEY: "858935979931885"
+#       CLOUDINARY_API_SECRET: "9yEzvn-uMH61j-3PX0iNYgRQXIY"
+#       REDIS_HOST: redis
+#       REDIS_PORT: "6379"
+#       REDIS_TLS: "false"
+#       FLW_SECRET_KEY: "FLWSECK_TEST-97c3bb611011073485fff66a143f7ef8-X"
+#       PSTK_SECRET_KEY: "sk_test_44c5a588da65a1fbb63fb049f5dc7f47de2789e8"
+#     volumes:
+#       - ./gempire-server:/app
+#       - /app/node_modules
+
+#   # -------------------
+#   # Frontend: Next.js
+#   # -------------------
+#   web:
+#     build: ./gempire-client
+#     container_name: gempire-web
+#     depends_on:
+#       - api
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       NEXT_PUBLIC_API_URL: "http://api:8000/api/v1"
+#       NEXT_PUBLIC_CURRENCY: "₦"
+#       NEXT_PUBLIC_EMAILJS_SERVICE_ID: "service_rjmk7t8"
+#       NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: "template_1puy2bl"
+#       NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: "HtU2y8DkWTklidEaT"
+#     volumes:
+#       - ./gempire-client:/app
+#       - /app/node_modules
+
+#   # -------------------
+#   # pgAdmin: GUI for Postgres
+#   # -------------------
+#   pgadmin:
+#     image: dpage/pgadmin4
+#     container_name: gempire-pgadmin
+#     depends_on:
+#       - db
+#     ports:
+#       - "5050:80"
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: admin@gempire.com
+#       PGADMIN_DEFAULT_PASSWORD: secret
+#     volumes:
+#       - pgadmindata:/var/lib/pgadmin
+
+#   # -------------------
+#   # Redis Commander: GUI for Redis
+#   # -------------------
+#   redis-commander:
+#     image: rediscommander/redis-commander:latest
+#     container_name: gempire-redis-commander
+#     depends_on:
+#       - redis
+#     ports:
+#       - "8081:8081"
+#     environment:
+#       - REDIS_HOSTS=local:redis:6379
+
+#   # -------------------
+#   # Pgweb: lightweight Postgres web UI
+#   # -------------------
+#   pgweb:
+#     image: sosedoff/pgweb
+#     container_name: gempire-pgweb
+#     restart: always
+#     depends_on:
+#       - db
+#     ports:
+#       - "8082:8081" # ⚡ mapped to 8082 locally to avoid clash
+#     environment:
+#       DATABASE_URL: "postgres://postgres:mypostgrespassword@db:5432/gempire?sslmode=disable"
+
+# volumes:
+#   gempire:
+#   redisdata:
+#   pgadmindata:

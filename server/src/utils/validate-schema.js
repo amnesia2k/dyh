@@ -1,15 +1,20 @@
 import { z } from "zod";
 
-// User schemas
-const registerSchema = z.object({
+export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  tribe: z.string().min(1, "Tribe is required"),
+  bio: z.string().optional(),
+  photo: z.string().url().optional(),
+  phone: z.string().optional(),
 });
 
-const loginSchema = z.object({
+export const updateSchema = registerSchema.partial();
+
+export const loginSchema = z.object({
   email: z.email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 // Member schemas
@@ -38,18 +43,18 @@ export const createMemberSchema = z.object({
 
 export const updateMemberSchema = createMemberSchema.partial();
 
-// HOT (Head of Tribe) schemas
-export const createHotSchema = z.object({
-  fullName: z.string().min(1, "Name is required"),
-  tribe: z.string().min(1, "Tribe is required"),
-  photo: z.string().url("Invalid photo URL").optional().or(z.literal("")),
-  phone: z.string().optional().or(z.literal("")),
-  email: z.string().email("Invalid email address").optional().or(z.literal("")),
-});
+// // HOT (Head of Tribe) schemas
+// export const createHotSchema = z.object({
+//   fullName: z.string().min(1, "Name is required"),
+//   tribe: z.string().min(1, "Tribe is required"),
+//   photo: z.string().url("Invalid photo URL").optional().or(z.literal("")),
+//   phone: z.string().optional().or(z.literal("")),
+//   email: z.string().email("Invalid email address").optional().or(z.literal("")),
+// });
 
-export const updateHotSchema = createHotSchema.partial();
+// export const updateHotSchema = createHotSchema.partial();
 
-export { registerSchema, loginSchema };
+// export { registerSchema, loginSchema };
 
 // birthday: z.string().datetime({ offset: true }).optional().or(z.literal("")),
 // birthday: z.iso.datetime({ local: true }).optional().or(z.literal("")),

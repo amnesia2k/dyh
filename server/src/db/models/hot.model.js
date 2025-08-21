@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { createId } from "@paralleldrive/cuid2";
+import bcrypt from "bcryptjs";
 
 const HotSchema = new mongoose.Schema(
   {
@@ -8,10 +9,28 @@ const HotSchema = new mongoose.Schema(
       default: () => createId(),
     },
 
-    fullName: {
+    email: {
       type: String,
       required: true,
+      unique: true,
+      lowercase: true,
       trim: true,
+    },
+
+    passwordHash: {
+      type: String,
+      required: true,
+      select: false,
+    },
+
+    name: {
+      type: String,
+      trim: true,
+    },
+
+    bio: {
+      type: String,
+      default: "This user has no bio",
     },
 
     tribe: {
@@ -20,20 +39,39 @@ const HotSchema = new mongoose.Schema(
       trim: true,
     },
 
+    role: {
+      type: String,
+      enum: ["admin", "hot"],
+      default: "hot",
+    },
+
+    lastLogin: Date,
+
     photo: String,
 
     phone: {
       type: String,
       trim: true,
     },
-
-    email: String,
   },
-  { timestamps: true, versionKey: false }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-HotSchema.index({ fullName: "text", tribe: "text" });
+HotSchema.index({ name: "text", tribe: "text" });
 
-export const HeadOfTribe =
+HotSchema.methods.comparePassword = async function (candidate) {
+  return bcrypt.compare(candidate, this.passwordHash);
+};
+
+HotSchema.methods.setPassword = async function (plain) {
+  this.passwordHash = await bcrypt.hash(plain, 10);
+  return this.passwordHash;
+};
+
+const Hot =
   mongoose.models.HeadOfTribe || mongoose.model("HeadOfTribe", HotSchema);
-export default HeadOfTribe;
+
+export default Hot;

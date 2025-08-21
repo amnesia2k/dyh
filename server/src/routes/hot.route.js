@@ -1,31 +1,40 @@
 import { Router } from "express";
 import {
-  createHot,
   deleteHot,
-  getAllHots,
+  getCurrentHot,
+  getHots,
   getSingleHot,
+  loginHot,
+  logoutHot,
+  registerHot,
   updateHot,
 } from "../controllers/hot.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { createHotSchema, updateHotSchema } from "../utils/validate-schema.js";
+import {
+  loginSchema,
+  registerSchema,
+  updateSchema,
+} from "../utils/validate-schema.js";
 import { validateRequest } from "zod-express-middleware";
 
 const router = Router();
 
-router.get("/", getAllHots);
+router.get("/me", protectRoute, getCurrentHot);
+router.get("/", getHots);
 router.get("/:id", getSingleHot);
 
 router.post(
-  "/",
-  protectRoute,
-  validateRequest({ body: createHotSchema }),
-  createHot
+  "/register",
+  validateRequest({ body: registerSchema }),
+  registerHot
 );
+router.post("/login", validateRequest({ body: loginSchema }), loginHot);
+router.post("/logout", protectRoute, logoutHot);
 
 router.patch(
   "/:id",
   protectRoute,
-  validateRequest({ body: updateHotSchema }),
+  validateRequest({ body: updateSchema }),
   updateHot
 );
 

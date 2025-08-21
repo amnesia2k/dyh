@@ -30,7 +30,7 @@ const SermonSchema = new mongoose.Schema(
 
     createdBy: { type: String, ref: "User" },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 SermonSchema.index({ title: "text", description: "text" });

@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
 
     avatar: String,
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 // instance method to compare password

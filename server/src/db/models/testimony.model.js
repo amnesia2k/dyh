@@ -43,7 +43,7 @@ const TestimonySchema = new mongoose.Schema(
 
     // approvedBy: { type: String, ref: "User", default: null }
   },
-  { timestamps: { createdAt: true, updatedAt: true } }
+  { timestamps: true, versionKey: false }
 );
 
 TestimonySchema.methods.toggleFeatured = async function () {

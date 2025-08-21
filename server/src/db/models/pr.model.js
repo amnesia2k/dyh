@@ -41,7 +41,7 @@ const PrayerRequestSchema = new mongoose.Schema(
 
     // ip: String
   },
-  { timestamps: { createdAt: true, updatedAt: true } }
+  { timestamps: true, versionKey: false }
 );
 
 PrayerRequestSchema.methods.markResolved = async function (userId) {

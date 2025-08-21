@@ -29,7 +29,7 @@ const AnnouncementSchema = new mongoose.Schema(
 
     // createdBy: { type: String, ref: "User" }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 AnnouncementSchema.index({ title: "text", summary: "text", body: "text" });

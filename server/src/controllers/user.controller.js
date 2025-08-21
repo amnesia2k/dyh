@@ -19,6 +19,7 @@ export const getUsers = async (_req, res) => {
   try {
     // exclude passwordHash explicitly
     const users = await User.find().select("-passwordHash");
+
     return res.status(200).json({
       message: "Users fetched successfully",
       success: true,
@@ -39,7 +40,9 @@ export const getCurrentUser = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Unauthorized: No user found" });
     }
+
     const user = req.user.toObject();
+
     // ensure sensitive fields are not leaked
     delete user.passwordHash;
     return res.status(200).json({
@@ -67,6 +70,7 @@ export const createUser = async (req, res) => {
     }
 
     const existing = await User.findOne({ email });
+
     if (existing) {
       return res
         .status(400)
@@ -106,6 +110,7 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password)
       return res
         .status(400)
@@ -157,6 +162,7 @@ export const logoutUser = async (_req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
+
     return res
       .status(200)
       .json({ success: true, message: "Logout successful" });

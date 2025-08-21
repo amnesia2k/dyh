@@ -8,7 +8,7 @@ const HotSchema = new mongoose.Schema(
       default: () => createId(),
     },
 
-    name: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
@@ -20,18 +20,19 @@ const HotSchema = new mongoose.Schema(
       trim: true,
     },
 
-    bio: String,
-
     photo: String,
 
-    contact: String,
+    phone: {
+      type: String,
+      trim: true,
+    },
 
-    // createdBy: { type: String, ref: "User" },
+    email: String,
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-HotSchema.index({ name: "text", department: "text" });
+HotSchema.index({ fullName: "text", tribe: "text" });
 
 export const HeadOfTribe =
   mongoose.models.HeadOfTribe || mongoose.model("HeadOfTribe", HotSchema);

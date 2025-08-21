@@ -12,7 +12,10 @@ export async function protectRoute(req, res, next) {
     if (!token) {
       return res
         .status(401)
-        .json({ success: false, message: "Unauthorized: No token" });
+        .json({
+          message: "Unauthorized: You must be logged in to access this route",
+          success: false,
+        });
     }
 
     let decoded;
@@ -21,7 +24,7 @@ export async function protectRoute(req, res, next) {
     } catch (err) {
       return res
         .status(401)
-        .json({ success: false, message: "Invalid or expired token" });
+        .json({ message: "Invalid or expired token", success: false });
     }
 
     // find user, exclude passwordHash
@@ -29,7 +32,7 @@ export async function protectRoute(req, res, next) {
     if (!user)
       return res
         .status(401)
-        .json({ success: false, message: "User not found" });
+        .json({ message: "User not found", success: false });
 
     req.user = user;
     next();
@@ -37,6 +40,6 @@ export async function protectRoute(req, res, next) {
     console.error("❌ protectRoute error:", err);
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ message: "Internal server error", success: false });
   }
 }

@@ -31,7 +31,7 @@ const EventSchema = new mongoose.Schema(
     // createdBy: {
     //   type: String, ref: "User" }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 EventSchema.index({ date: 1 });

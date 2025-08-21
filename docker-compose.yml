@@ -60,20 +60,20 @@ services:
   # -------------------
   # Frontend: Vite (commented for now)
   # -------------------
-  web:
-    build: ./client
-    container_name: dyh-web
-    depends_on:
-      - api
-    ports:
-      - "3000:3000"
-    environment:
-      VITE_API_BASE_URL: http://localhost:8000/api/v1
-      VITE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-    volumes:
-      - ./client:/app
-      # - /app/node_modules # keep host from overriding container modules
-    command: pnpm dev # runs vite
+  # web:
+  #   build: ./client
+  #   container_name: dyh-web
+  #   depends_on:
+  #     - api
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
+  #     VITE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+  #   volumes:
+  #     - ./client:/app
+  #     # - /app/node_modules # keep host from overriding container modules
+  #   command: pnpm dev # runs vite
 
   # -------------------
   # Redis Commander: GUI for Redis

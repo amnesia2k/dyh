@@ -1,4 +1,3 @@
-// controllers/memberController.js
 import Member from "../db/models/member.model.js";
 
 /**
@@ -13,20 +12,11 @@ export const createMember = async (req, res) => {
       birthday,
       address,
       departmentOfInterest = "none",
-      // tags,
       photo,
       joinedAt,
     } = req.body;
 
-    if (
-      !fullName ||
-      !email ||
-      !phone ||
-      !birthday ||
-      !address
-      // !tags ||
-      // !photo
-    ) {
+    if (!fullName || !email || !phone || !birthday || !address) {
       return res.status(400).json({
         success: false,
         message: "Full name and email are required.",
@@ -53,7 +43,6 @@ export const createMember = async (req, res) => {
       birthday: parsedBirthday,
       address,
       departmentOfInterest,
-      // tags,
       photo,
       joinedAt,
     });
@@ -177,7 +166,7 @@ export const deleteMember = async (req, res) => {
     return res.status(200).json({
       message: "Member deleted successfully",
       success: true,
-      data: deletedMember,
+      // data: deletedMember,
     });
   } catch (error) {
     return res.status(500).json({

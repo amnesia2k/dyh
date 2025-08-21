@@ -1,5 +1,6 @@
-import { z } from "zod";
+import { date, z } from "zod";
 
+// Auth schemas
 export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.email("Invalid email address"),
@@ -42,6 +43,23 @@ export const createMemberSchema = z.object({
 });
 
 export const updateMemberSchema = createMemberSchema.partial();
+
+// Sermon schemas
+export const createSermonSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  spotifyEmbedUrl: z
+    .string()
+    .url("Invalid Spotify embed URL")
+    .optional()
+    .or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+  speaker: z.string().optional().or(z.literal("")),
+});
+
+export const updateSermonSchema = createSermonSchema.partial();
 
 // // HOT (Head of Tribe) schemas
 // export const createHotSchema = z.object({

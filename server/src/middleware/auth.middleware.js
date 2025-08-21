@@ -1,4 +1,3 @@
-// middleware/auth.middleware.js
 import { verifyToken } from "../utils/generate-token.js";
 import Hot from "../db/models/hot.model.js";
 import { logger } from "../utils/logger.js";

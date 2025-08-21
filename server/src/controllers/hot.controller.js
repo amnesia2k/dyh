@@ -1,6 +1,7 @@
 import Hot from "../db/models/hot.model.js";
 import { generateToken } from "../utils/generate-token.js";
 import bcrypt from "bcryptjs";
+import { logger } from "../utils/logger.js";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -20,7 +21,7 @@ export const getHots = async (_req, res) => {
       data: { hots },
     });
   } catch (err) {
-    console.error("❌ getHots error:", err);
+    logger.error("❌ getHots error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -42,7 +43,7 @@ export const getCurrentHot = async (req, res) => {
       data: { user },
     });
   } catch (err) {
-    console.error("❌ getCurrentHot error:", err);
+    logger.error("❌ getCurrentHot error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -85,7 +86,7 @@ export const registerHot = async (req, res) => {
       data: { user: safeUser },
     });
   } catch (err) {
-    console.error("❌ createHot error:", err);
+    logger.error("❌ createHot error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -104,7 +105,7 @@ export const getSingleHot = async (req, res) => {
       .status(200)
       .json({ message: "HOT fetched successfully", success: true, data: safe });
   } catch (err) {
-    console.error("❌ getSingleHot error:", err);
+    logger.error("❌ getSingleHot error:", err);
     res.status(500).json({ message: "Server error", success: false });
   }
 };
@@ -135,7 +136,7 @@ export const updateHot = async (req, res) => {
       data: updated,
     });
   } catch (err) {
-    console.error("❌ updateHot error:", err);
+    logger.error("❌ updateHot error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -152,7 +153,7 @@ export const deleteHot = async (req, res) => {
       .status(200)
       .json({ message: "HOT deleted successfully", success: true });
   } catch (err) {
-    console.error("❌ deleteHot error:", err);
+    logger.error("❌ deleteHot error:", err);
     res.status(500).json({ message: "Server error", success: false });
   }
 };
@@ -191,7 +192,7 @@ export const loginHot = async (req, res) => {
       data: { user: safeUser },
     });
   } catch (err) {
-    console.error("❌ loginHot error:", err);
+    logger.error("❌ loginHot error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -210,7 +211,7 @@ export const logoutHot = async (_req, res) => {
       .status(200)
       .json({ success: true, message: "Logout successful" });
   } catch (err) {
-    console.error("❌ logoutHot error:", err);
+    logger.error("❌ logoutHot error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

@@ -1,6 +1,7 @@
 import User from "../db/models/user.model.js";
 import { generateToken } from "../utils/generate-token.js";
 import bcrypt from "bcryptjs";
+import { logger } from "../utils/logger.js";
 
 /**
  * NOTE: this controller uses passwordHash consistently.
@@ -26,7 +27,7 @@ export const getUsers = async (_req, res) => {
       data: { users },
     });
   } catch (err) {
-    console.error("❌ getUsers error:", err);
+    logger.error("❌ getUsers error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -51,7 +52,7 @@ export const getCurrentUser = async (req, res) => {
       data: { user },
     });
   } catch (err) {
-    console.error("❌ getCurrentUser error:", err);
+    logger.error("❌ getCurrentUser error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -100,7 +101,7 @@ export const createUser = async (req, res) => {
       data: { user: safeUser },
     });
   } catch (err) {
-    console.error("❌ createUser error:", err);
+    logger.error("❌ createUser error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -146,7 +147,7 @@ export const loginUser = async (req, res) => {
       data: { user: safeUser },
     });
   } catch (err) {
-    console.error("❌ loginUser error:", err);
+    logger.error("❌ loginUser error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -167,7 +168,7 @@ export const logoutUser = async (_req, res) => {
       .status(200)
       .json({ success: true, message: "Logout successful" });
   } catch (err) {
-    console.error("❌ logoutUser error:", err);
+    logger.error("❌ logoutUser error:", err);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

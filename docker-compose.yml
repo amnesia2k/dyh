@@ -46,7 +46,7 @@ services:
       - "8000:8000"
     environment:
       NODE_ENV: development
-      DB_URL: mongodb://db/dyhdb
+      DATABASE_URL: mongodb://db/dyhdb
       JWT_SECRET: f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
       FRONTEND_URL: http://localhost:3000
       REDIS_HOST: redis

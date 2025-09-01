@@ -24,11 +24,11 @@ const SermonSchema = new mongoose.Schema(
 
     description: String,
 
-    // speaker: String,
+    speaker: String,
 
     // tags: [String],
 
-    createdBy: { type: String, ref: "User" },
+    // createdBy: { type: String, ref: "User" },
   },
   { timestamps: true, versionKey: false }
 );

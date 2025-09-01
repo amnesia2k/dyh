@@ -1,4 +1,5 @@
 import Member from "../db/models/member.model.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Create a new member
@@ -53,7 +54,7 @@ export const createMember = async (req, res) => {
       data: member,
     });
   } catch (error) {
-    console.error("Create Member Error:", error);
+    logger.error("Create Member Error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to create member",

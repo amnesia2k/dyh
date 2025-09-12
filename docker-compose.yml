@@ -42,6 +42,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: always
     ports:
       - "8000:8000"
     environment:
@@ -54,7 +55,7 @@ services:
       REDIS_TLS: "false"
     volumes:
       - ./server:/app
-      # - /app/node_modules # keep host from overriding container modules
+      - /app/node_modules # keep host from overriding container modules
     command: pnpm dev # runs nodemon
 
   # -------------------
@@ -65,6 +66,7 @@ services:
   #   container_name: dyh-web
   #   depends_on:
   #     - api
+  #   restart: always
   #   ports:
   #     - "3000:3000"
   #   environment:
@@ -72,7 +74,7 @@ services:
   #     VITE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
   #   volumes:
   #     - ./client:/app
-  #     # - /app/node_modules # keep host from overriding container modules
+  #     - /app/node_modules # keep host from overriding container modules
   #   command: pnpm dev # runs vite
 
   # -------------------
@@ -85,6 +87,7 @@ services:
       - redis
     ports:
       - "8081:8081"
+    restart: always
     environment:
       - REDIS_HOSTS=local:redis:6379
 

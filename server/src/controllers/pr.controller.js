@@ -56,6 +56,31 @@ export const getAllPRs = async (req, res) => {
   }
 };
 
+export const getSinglePR = async (req, res) => {
+  try {
+    const request = await PrayerRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({
+        message: "Prayer request not found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Prayer Request fetched successfully",
+      success: true,
+      data: request,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get Prayer Request",
+      error: error.message,
+    });
+  }
+};
+
 export const updatePRStatus = async (req, res) => {
   try {
     const { id } = req.params;

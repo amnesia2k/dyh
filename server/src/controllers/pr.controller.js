@@ -1,4 +1,5 @@
 import { PrayerRequest } from "../db/models/pr.model.js";
+import { logActivity } from "../utils/activity.queue.js";
 import { logger } from "../utils/logger.js";
 
 export const createPR = async (req, res) => {
@@ -18,6 +19,8 @@ export const createPR = async (req, res) => {
       message,
       // anonymous,
     });
+
+    await logActivity("PRAYER_REQUEST", "NEW", pr);
 
     return res.status(201).json({
       message: "Prayer Request created successfully",
@@ -97,6 +100,8 @@ export const updatePRStatus = async (req, res) => {
         success: false,
       });
     }
+
+    await logActivity("PRAYER_REQUEST", "UPDATED", request);
 
     return res.status(200).json({
       message: "Prayer Request updated successfully",

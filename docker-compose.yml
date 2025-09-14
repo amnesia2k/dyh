@@ -58,6 +58,26 @@ services:
       - /app/node_modules # keep host from overriding container modules
     command: pnpm dev # runs nodemon
 
+  worker:
+    build: ./server
+    container_name: dyh-worker
+    depends_on:
+      - db
+      - redis
+    restart: always
+    environment:
+      NODE_ENV: development
+      DB_URL: mongodb://db/dyhdb
+      JWT_SECRET: f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
+      FRONTEND_URL: http://localhost:3000
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_TLS: "false"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: pnpm worker:activity
+
   # -------------------
   # Frontend: Vite (commented for now)
   # -------------------

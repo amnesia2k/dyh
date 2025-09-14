@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "prettier": "prettier --write . --log-level silent"
+    "prettier": "prettier --write . --log-level silent",
+    "worker:activity": "node --watch src/utils/activity.worker.js"
   },
   "keywords": [],
   "author": "",
@@ -17,11 +18,13 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "bcryptjs": "^3.0.2",
+    "bullmq": "^5.58.5",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.5",
     "morgan": "^1.10.1",

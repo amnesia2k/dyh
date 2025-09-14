@@ -2,7 +2,7 @@ import "dotenv/config";
 
 export const env = {
   PORT: process.env.PORT || 8000,
-  DATABASE_URL: process.env.DATABASE_URL,
+  DB_URL: process.env.DB_URL,
   JWT_SECRET: process.env.JWT_SECRET,
   NODE_ENV: process.env.NODE_ENV,
   FRONTEND_URL: process.env.FRONTEND_URL,

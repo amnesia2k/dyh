@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import { logger } from "../utils/logger.js";
+import { env } from "../utils/env.js";
 
-const DB_URL = process.env.DB_URL;
+const DB_URL = env.DB_URL;
 
 export const connectToDB = async () => {
   try {

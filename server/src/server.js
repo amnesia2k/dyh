@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,15 +5,15 @@ import { logger } from "./utils/logger.js";
 import { connectToDB } from "./db/mongo.js";
 import morgan from "morgan";
 import routes from "./routes/index.route.js";
-
-dotenv.config();
+import { env } from "./utils/env.js";
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+
+const PORT = env.PORT;
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: env.FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

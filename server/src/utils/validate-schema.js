@@ -22,11 +22,7 @@ export const loginSchema = z.object({
 export const createMemberSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
-  phone: z
-    .string()
-    .min(1, "Phone number is required")
-    .optional()
-    .or(z.literal("")),
+  phone: z.string().min(1, "Phone number is required").optional().or(z.literal("")),
   birthday: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
@@ -47,19 +43,23 @@ export const updateMemberSchema = createMemberSchema.partial();
 // Sermon schemas
 export const createSermonSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  spotifyEmbedUrl: z
-    .string()
-    .url("Invalid Spotify embed URL")
-    .optional()
-    .or(z.literal("")),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  spotifyEmbedUrl: z.string().url("Invalid Spotify embed URL").optional().or(z.literal("")),
   description: z.string().optional().or(z.literal("")),
   speaker: z.string().optional().or(z.literal("")),
 });
 
 export const updateSermonSchema = createSermonSchema.partial();
+
+export const createPrSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  message: z.string().min(1, "Message is required"),
+  anonymous: z.boolean().optional(),
+  status: z.enum(["new", "read", "resolved"]).optional(),
+});
+
+export const updatePrSchema = createPrSchema.partial();
 
 // // HOT (Head of Tribe) schemas
 // export const createHotSchema = z.object({

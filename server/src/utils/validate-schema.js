@@ -51,7 +51,36 @@ export const createSermonSchema = z.object({
 
 export const updateSermonSchema = createSermonSchema.partial();
 
-export const createPrSchema = z.object({
+export const createPrSchema = z
+  .object({
+    fullName: z.string().optional().or(z.literal("")),
+    email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    message: z.string().min(1, "Message is required"),
+    anonymous: z.boolean().optional().default(false),
+    status: z.enum(["new", "read", "resolved"]).optional().default("new"),
+  })
+  .superRefine((v, ctx) => {
+    if (!v.anonymous) {
+      if (!v.fullName || v.fullName.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["fullName"],
+          message: "Full name is required",
+        });
+      }
+      if (!v.email || v.email.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["email"],
+          message: "Email is required",
+        });
+      }
+    }
+  });
+
+export const updatePrSchema = createPrSchema.partial();
+
+export const createTestimonySchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address").min(1, "Email is required"),
   message: z.string().min(1, "Message is required"),
@@ -59,7 +88,7 @@ export const createPrSchema = z.object({
   status: z.enum(["new", "read", "resolved"]).optional(),
 });
 
-export const updatePrSchema = createPrSchema.partial();
+export const updateTestimonySchema = createTestimonySchema.partial();
 
 // // HOT (Head of Tribe) schemas
 // export const createHotSchema = z.object({

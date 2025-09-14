@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import "dotenv/config";
+import { env } from "./env";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = env.JWT_SECRET;
 
 export function generateToken(userId) {
   return jwt.sign({ _id: userId, purpose: "authentication" }, JWT_SECRET, {

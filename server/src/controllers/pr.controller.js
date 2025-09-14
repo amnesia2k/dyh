@@ -1,4 +1,5 @@
 import { PrayerRequest } from "../db/models/pr.model.js";
+import { logger } from "../utils/logger.js";
 
 export const createPR = async (req, res) => {
   try {
@@ -38,7 +39,7 @@ export const getAllPRs = async (req, res) => {
 
     const totalRequests = await PrayerRequest.countDocuments();
 
-    // console.log(`Total Prayer Requests: ${totalRequests}`);
+    logger.info(`Total Prayer Requests: ${totalRequests}`);
 
     return res.status(200).json({
       message: "Prayer requests fetched successfully",

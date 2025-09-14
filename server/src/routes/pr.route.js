@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { validateRequest } from "zod-express-middleware";
 import { createPrSchema, updatePrSchema } from "../utils/validate-schema.js";
+import { protectRoute } from "../middleware/auth.middleware.js";
 import { createPR, getAllPRs, updatePRStatus } from "../controllers/pr.controller.js";
 
 const router = Router();
@@ -12,6 +13,6 @@ router.post("/", validateRequest({ body: createPrSchema }), createPR);
 router.get("/", getAllPRs);
 
 // update prayer request
-router.patch("/:id", validateRequest({ body: updatePrSchema }), updatePRStatus);
+router.patch("/:id", protectRoute, validateRequest({ body: updatePrSchema }), updatePRStatus);
 
 export default router;

@@ -4,8 +4,7 @@ import { logger } from "../utils/logger.js";
 
 export async function protectRoute(req, res, next) {
   try {
-    const token =
-      req.cookies?.token || req.headers?.authorization?.split?.("Bearer ")?.[1];
+    const token = req.cookies?.token || req.headers?.authorization?.split?.("Bearer ")?.[1];
     if (!token) {
       return res.status(401).json({
         message: "Unauthorized: You must be logged in to access this route",
@@ -19,9 +18,7 @@ export async function protectRoute(req, res, next) {
       logger.info("protectRoute: decoded token:", decoded);
     } catch (err) {
       logger.error("protectRoute: token verification failed", err);
-      return res
-        .status(401)
-        .json({ message: "Invalid or expired token", success: false });
+      return res.status(401).json({ message: "Invalid or expired token", success: false });
     }
 
     // Load the HOT by decoded._id
@@ -29,17 +26,31 @@ export async function protectRoute(req, res, next) {
     logger.info("protectRoute: hot lookup result:", user);
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "User not found", success: false });
+      return res.status(401).json({ message: "User not found", success: false });
     }
 
     req.user = user;
     next();
   } catch (err) {
     logger.error("❌ protectRoute error:", err);
-    return res
-      .status(500)
-      .json({ message: "Internal server error", success: false });
+    return res.status(500).json({ message: "Internal server error", success: false });
   }
+}
+
+export function adminGuard(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized: No user context found",
+      success: false,
+    });
+  }
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      message: "Forbidden: Admins only",
+      success: false,
+    });
+  }
+
+  next();
 }

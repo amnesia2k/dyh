@@ -1,8 +1,7 @@
-import { PrayerRequest } from "../db/models/pr.model.js";
-import { logActivity } from "../utils/activity.queue.js";
+import { Testimony } from "../db/models/testimony.model.js";
 import { logger } from "../utils/logger.js";
 
-export const createPR = async (req, res) => {
+export const createTestimony = async (req, res) => {
   try {
     const { fullName, email, message } = req.body;
 
@@ -13,24 +12,22 @@ export const createPR = async (req, res) => {
       });
     }
 
-    const pr = await PrayerRequest.create({
+    const testimony = await Testimony.create({
       fullName,
       email,
       message,
       // anonymous,
     });
 
-    await logActivity("PRAYER_REQUEST", "NEW", pr);
-
     return res.status(201).json({
-      message: "Prayer Request created successfully",
+      message: "Testimony created successfully",
       success: true,
-      data: pr,
+      data: testimony,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Failed to create Prayer Request",
+      message: "Failed to create Testimony",
       error: error.message,
     });
   }
@@ -38,10 +35,9 @@ export const createPR = async (req, res) => {
 
 export const getAllPRs = async (req, res) => {
   try {
-    const [prayerRequests, totalRequests] = await Promise.all([
-      PrayerRequest.find().sort({ createdAt: -1 }),
-      PrayerRequest.countDocuments(),
-    ]);
+    const prayerRequests = await Testimony.find().sort({ createdAt: -1 });
+
+    const totalRequests = await Testimony.countDocuments();
 
     logger.info(`Total Prayer Requests: ${totalRequests}`);
 
@@ -100,8 +96,6 @@ export const updatePRStatus = async (req, res) => {
         success: false,
       });
     }
-
-    await logActivity("PRAYER_REQUEST", "UPDATED", request);
 
     return res.status(200).json({
       message: "Prayer Request updated successfully",

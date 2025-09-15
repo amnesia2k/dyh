@@ -19,6 +19,12 @@ const ActivityLogSchema = new mongoose.Schema(
       required: true,
     },
 
+    type: {
+      type: String,
+      enum: ["NEW", "UPDATED", "DELETED"], // or whatever categories you need
+      required: true,
+    },
+
     meta: {
       type: mongoose.Schema.Types.Mixed,
     },
@@ -29,6 +35,6 @@ const ActivityLogSchema = new mongoose.Schema(
 ActivityLogSchema.index({ createdAt: -1 });
 
 export const ActivityLog =
-  mongoose.models.ActivityLog ||
-  mongoose.model("ActivityLog", ActivityLogSchema);
+  mongoose.models.ActivityLog || mongoose.model("ActivityLog", ActivityLogSchema);
+
 export default ActivityLog;

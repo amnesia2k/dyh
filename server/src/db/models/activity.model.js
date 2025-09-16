@@ -8,25 +8,26 @@ const ActivityLogSchema = new mongoose.Schema(
       default: () => createId(),
     },
 
-    // actor: {
-    //   type: String,
-    //   ref: "User",
-    //   default: null,
-    // },
+    type: {
+      type: String,
+      enum: ["member", "prayer", "testimony", "sermon", "announcement", "hot", "event"],
+      required: true,
+    },
 
     action: {
       type: String,
+      enum: ["created", "updated", "deleted", "status"],
       required: true,
     },
 
-    type: {
+    refId: {
       type: String,
-      enum: ["NEW", "UPDATED", "DELETED"], // or whatever categories you need
       required: true,
     },
 
-    meta: {
-      type: mongoose.Schema.Types.Mixed,
+    summary: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true, versionKey: false }

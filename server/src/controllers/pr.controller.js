@@ -20,7 +20,12 @@ export const createPR = async (req, res) => {
       // anonymous,
     });
 
-    await logActivity("PRAYER_REQUEST", "NEW", pr);
+    await logActivity({
+      type: "prayer",
+      action: "created",
+      refId: pr._id,
+      summary: `Prayer Request created by ${fullName}`,
+    });
 
     return res.status(201).json({
       message: "Prayer Request created successfully",
@@ -101,7 +106,12 @@ export const updatePRStatus = async (req, res) => {
       });
     }
 
-    await logActivity("PRAYER_REQUEST", "UPDATED", request);
+    await logActivity({
+      type: "prayer",
+      action: "updated",
+      refId: request._id,
+      summary: `Prayer Request status updated`, // by ${fullName}
+    });
 
     return res.status(200).json({
       message: "Prayer Request updated successfully",

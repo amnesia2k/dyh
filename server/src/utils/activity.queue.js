@@ -5,6 +5,7 @@ export const activityQueue = new Queue("activity-queue", {
   connection: redisConnection,
 });
 
-export async function logActivity(action, type, meta = {}) {
-  await activityQueue.add("log", { action, type, meta });
+// enforce frontend-like shape
+export async function logActivity({ type, action, refId, summary }) {
+  await activityQueue.add("log", { type, action, refId, summary });
 }

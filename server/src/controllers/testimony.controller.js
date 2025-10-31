@@ -58,7 +58,7 @@ export const getAllPRs = async (req, res) => {
 
 export const getSinglePR = async (req, res) => {
   try {
-    const request = await PrayerRequest.findById(req.params.id);
+    const request = await Testimony.findById(req.params.id);
 
     if (!request) {
       return res.status(404).json({
@@ -85,7 +85,7 @@ export const updatePRStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const request = await PrayerRequest.findByIdAndUpdate(id, req.body, {
+    const request = await Testimony.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
     });

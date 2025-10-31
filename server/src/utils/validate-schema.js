@@ -1,4 +1,4 @@
-import { date, z } from "zod";
+import { z } from "zod";
 
 // Auth schemas
 export const registerSchema = z.object({

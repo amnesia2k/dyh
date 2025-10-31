@@ -55,6 +55,5 @@ PrayerRequestSchema.index({ status: 1, createdAt: -1 });
 PrayerRequestSchema.index({ message: "text" });
 
 export const PrayerRequest =
-  mongoose.models.PrayerRequest ||
-  mongoose.model("PrayerRequest", PrayerRequestSchema);
+  mongoose.models.PrayerRequest || mongoose.model("PrayerRequest", PrayerRequestSchema);
 export default PrayerRequest;

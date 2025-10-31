@@ -54,6 +54,5 @@ TestimonySchema.methods.toggleFeatured = async function () {
 TestimonySchema.index({ approved: 1, featured: -1, createdAt: -1 });
 TestimonySchema.index({ message: "text" });
 
-export const Testimony =
-  mongoose.models.Testimony || mongoose.model("Testimony", TestimonySchema);
+export const Testimony = mongoose.models.Testimony || mongoose.model("Testimony", TestimonySchema);
 export default Testimony;

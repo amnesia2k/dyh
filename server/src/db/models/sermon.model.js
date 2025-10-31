@@ -36,6 +36,5 @@ const SermonSchema = new mongoose.Schema(
 SermonSchema.index({ title: "text", description: "text" });
 SermonSchema.index({ date: -1 });
 
-export const Sermon =
-  mongoose.models.Sermon || mongoose.model("Sermon", SermonSchema);
+export const Sermon = mongoose.models.Sermon || mongoose.model("Sermon", SermonSchema);
 export default Sermon;

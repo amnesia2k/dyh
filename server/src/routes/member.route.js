@@ -7,10 +7,7 @@ import {
   updateMember,
 } from "../controllers/member.controller.js";
 import { validateRequest } from "zod-express-middleware";
-import {
-  createMemberSchema,
-  updateMemberSchema,
-} from "../utils/validate-schema.js";
+import { createMemberSchema, updateMemberSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -20,11 +17,7 @@ router.get("/:id", protectRoute, getSingleMember);
 
 router.post("/", validateRequest({ body: createMemberSchema }), createMember);
 
-router.patch(
-  "/:id",
-  validateRequest({ body: updateMemberSchema }),
-  updateMember
-);
+router.patch("/:id", validateRequest({ body: updateMemberSchema }), updateMember);
 
 router.delete("/:id", protectRoute, deleteMember);
 

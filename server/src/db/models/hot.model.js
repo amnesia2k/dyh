@@ -71,7 +71,6 @@ HotSchema.methods.setPassword = async function (plain) {
   return this.passwordHash;
 };
 
-const Hot =
-  mongoose.models.HeadOfTribe || mongoose.model("HeadOfTribe", HotSchema);
+const Hot = mongoose.models.HeadOfTribe || mongoose.model("HeadOfTribe", HotSchema);
 
 export default Hot;

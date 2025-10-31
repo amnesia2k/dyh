@@ -49,6 +49,5 @@ const MemberSchema = new mongoose.Schema(
 
 MemberSchema.index({ fullName: "text", email: "text", phone: "text" });
 
-export const Member =
-  mongoose.models.Member || mongoose.model("Member", MemberSchema);
+export const Member = mongoose.models.Member || mongoose.model("Member", MemberSchema);
 export default Member;

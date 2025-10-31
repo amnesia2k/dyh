@@ -22,18 +22,14 @@ export const getHots = async (_req, res) => {
     });
   } catch (err) {
     logger.error("❌ getHots error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const getCurrentHot = async (req, res) => {
   try {
     if (!req.user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No user found" });
+      return res.status(401).json({ success: false, message: "Unauthorized: No user found" });
     }
     const user = req.user.toObject();
     delete user.passwordHash;
@@ -44,9 +40,7 @@ export const getCurrentHot = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ getCurrentHot error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -61,9 +55,7 @@ export const registerHot = async (req, res) => {
     }
     const existing = await Hot.findOne({ email });
     if (existing) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email address already in use." });
+      return res.status(400).json({ success: false, message: "Email address already in use." });
     }
     const hashed = await bcrypt.hash(password, 10);
     const newHot = await Hot.create({
@@ -87,9 +79,7 @@ export const registerHot = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ createHot error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -101,9 +91,7 @@ export const getSingleHot = async (req, res) => {
     }
     const safe = hot.toObject();
     delete safe.passwordHash;
-    res
-      .status(200)
-      .json({ message: "HOT fetched successfully", success: true, data: safe });
+    res.status(200).json({ message: "HOT fetched successfully", success: true, data: safe });
   } catch (err) {
     logger.error("❌ getSingleHot error:", err);
     res.status(500).json({ message: "Server error", success: false });
@@ -149,9 +137,7 @@ export const deleteHot = async (req, res) => {
       return res.status(404).json({ message: "HOT not found", success: false });
     }
 
-    res
-      .status(200)
-      .json({ message: "HOT deleted successfully", success: true });
+    res.status(200).json({ message: "HOT deleted successfully", success: true });
   } catch (err) {
     logger.error("❌ deleteHot error:", err);
     res.status(500).json({ message: "Server error", success: false });
@@ -162,21 +148,15 @@ export const loginHot = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required." });
+      return res.status(400).json({ success: false, message: "Email and password are required." });
 
     const hot = await Hot.findOne({ email }).select("+passwordHash");
     if (!hot)
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     const isMatch = await hot.comparePassword(password);
     if (!isMatch)
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     hot.lastLogin = new Date();
     await hot.save();
@@ -193,9 +173,7 @@ export const loginHot = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ loginHot error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -207,13 +185,9 @@ export const logoutHot = async (_req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
-    return res
-      .status(200)
-      .json({ success: true, message: "Logout successful" });
+    return res.status(200).json({ success: true, message: "Logout successful" });
   } catch (err) {
     logger.error("❌ logoutHot error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

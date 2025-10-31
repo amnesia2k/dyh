@@ -36,6 +36,5 @@ AnnouncementSchema.index({ title: "text", summary: "text", body: "text" });
 AnnouncementSchema.index({ pinned: -1, date: -1 });
 
 export const Announcement =
-  mongoose.models.Announcement ||
-  mongoose.model("Announcement", AnnouncementSchema);
+  mongoose.models.Announcement || mongoose.model("Announcement", AnnouncementSchema);
 export default Announcement;

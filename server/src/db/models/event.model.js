@@ -37,6 +37,5 @@ const EventSchema = new mongoose.Schema(
 EventSchema.index({ date: 1 });
 EventSchema.index({ title: "text", description: "text" });
 
-export const Event =
-  mongoose.models.Event || mongoose.model("Event", EventSchema);
+export const Event = mongoose.models.Event || mongoose.model("Event", EventSchema);
 export default Event;

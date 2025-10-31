@@ -18,17 +18,9 @@ export const logger = (() => {
 
     if (typeof message === "object") {
       // Log prefix + object separately so Node pretty-prints it
-      console[level === "warn" ? "warn" : level](
-        prefix,
-        message,
-        ...optionalParams
-      );
+      console[level === "warn" ? "warn" : level](prefix, message, ...optionalParams);
     } else {
-      console[level === "warn" ? "warn" : level](
-        prefix,
-        message,
-        ...optionalParams
-      );
+      console[level === "warn" ? "warn" : level](prefix, message, ...optionalParams);
     }
 
     if (level === "fatal") process.exit(1);

@@ -28,18 +28,14 @@ export const getUsers = async (_req, res) => {
     });
   } catch (err) {
     logger.error("❌ getUsers error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const getCurrentUser = async (req, res) => {
   try {
     if (!req.user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No user found" });
+      return res.status(401).json({ success: false, message: "Unauthorized: No user found" });
     }
 
     const user = req.user.toObject();
@@ -53,9 +49,7 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ getCurrentUser error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -73,9 +67,7 @@ export const createUser = async (req, res) => {
     const existing = await User.findOne({ email });
 
     if (existing) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email address already in use." });
+      return res.status(400).json({ success: false, message: "Email address already in use." });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -102,9 +94,7 @@ export const createUser = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ createUser error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -113,22 +103,16 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password)
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required." });
+      return res.status(400).json({ success: false, message: "Email and password are required." });
 
     // include passwordHash for comparison
     const user = await User.findOne({ email }).select("+passwordHash");
     if (!user)
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch)
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     // Update lastLogin (optional)
     user.lastLogin = new Date();
@@ -148,9 +132,7 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     logger.error("❌ loginUser error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -164,13 +146,9 @@ export const logoutUser = async (_req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Logout successful" });
+    return res.status(200).json({ success: true, message: "Logout successful" });
   } catch (err) {
     logger.error("❌ logoutUser error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

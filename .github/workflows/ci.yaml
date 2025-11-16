@@ -91,8 +91,7 @@ jobs:
       - name: 🚀 Start production server
         working-directory: client
         run: |
-          bun run preview -- --port 3000 &
-          # Wait for the app to boot and respond
+          bun run start -- --port 3000 &
           for i in {1..10}; do
             if curl -sSf http://localhost:3000 > /dev/null; then
               echo "✅ App is up!"
@@ -103,6 +102,7 @@ jobs:
           done
           echo "❌ App did not start in time" >&2
           exit 1
+      
 
       - name: 🛑 Stop server
         run: kill $(lsof -t -i:3000)

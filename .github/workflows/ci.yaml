@@ -79,6 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
+          path: client   # <-- FIXED: place artifact directly into client folder
 
       - name: ⚡ Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -86,12 +87,14 @@ jobs:
           bun-version: latest
 
       - name: 📦 Install dependencies
+        working-directory: client   # <-- FIXED: install only client deps for speed + correctness
         run: bun install --frozen-lockfile
 
       - name: 🚀 Start production server
         working-directory: client
         run: |
-          bun run start -- --port 3000 &
+          bun run start &
+          # Wait for the app to boot and respond
           for i in {1..10}; do
             if curl -sSf http://localhost:3000 > /dev/null; then
               echo "✅ App is up!"
@@ -102,7 +105,6 @@ jobs:
           done
           echo "❌ App did not start in time" >&2
           exit 1
-      
 
       - name: 🛑 Stop server
         run: kill $(lsof -t -i:3000)

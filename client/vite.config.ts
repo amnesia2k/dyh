@@ -7,11 +7,15 @@ import tailwindcss from '@tailwindcss/vite'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const isDocker = process.env.IN_DOCKER === '1'
+const isCI = process.env.CI === 'true' // IMPORTANT FIX
 
 export default defineConfig({
   plugins: [
     devtools(),
-    !isDocker && netlify(),
+
+    // disable Netlify plugin on CI + Docker
+    !isDocker && !isCI && netlify(),
+
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
@@ -22,5 +26,5 @@ export default defineConfig({
         plugins: ['babel-plugin-react-compiler'],
       },
     }),
-  ].filter(Boolean), // FILTER FIX
+  ].filter(Boolean),
 })

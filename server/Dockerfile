@@ -1,28 +1,37 @@
-# Use an ARG for easy pinning of pnpm version
-ARG PNPM_VERSION=10.13.1
+FROM oven/bun:latest
 
-# Base image
-FROM node:24-alpine
-
-# Install pnpm globally (with caching for npm downloads)
-RUN --mount=type=cache,target=/root/.npm \
-    npm install -g pnpm@${PNPM_VERSION}
-
-# Set working directory
 WORKDIR /app
 
-# Copy only dependency files first (to leverage Docker cache)
-COPY package.json pnpm-lock.yaml ./
+# Copy root workspace manifests
+COPY bun.lock ./bun.lock
+COPY package.json ./package.json
 
-# Install dependencies using pnpm, caching the pnpm store
-RUN --mount=type=cache,target=/root/.pnpm-store \
-    pnpm install
+# Copy ONLY server’s workspace manifest
+COPY server/package.json ./server/package.json
 
-# Copy rest of the source code
+# Copy the entire repo
 COPY . .
 
-# Expose the application port
+# Install deps for server workspace
+RUN bun install --cwd ./server
+
+WORKDIR /app/server
+
 EXPOSE 8000
 
-# Default command
-CMD ["pnpm", "dev"]
+CMD ["bun", "dev"]
+
+# FROM oven/bun:latest
+
+# WORKDIR /app
+
+# # Install dependencies with Bun
+# COPY package.json bun.lockb ./
+# RUN bun install
+
+# # Copy the rest of the application
+# COPY . .
+
+# EXPOSE 8000
+
+# CMD ["bun", "dev"]

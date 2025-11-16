@@ -5,8 +5,8 @@ Welcome to your new TanStack app!
 To run this application:
 
 ```bash
-pnpm install
-pnpm start
+bun install
+bun --bun run start
 ```
 
 # Building For Production
@@ -14,7 +14,7 @@ pnpm start
 To build this application for production:
 
 ```bash
-pnpm build
+bun --bun run build
 ```
 
 ## Testing
@@ -22,7 +22,7 @@ pnpm build
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
 
 ```bash
-pnpm test
+bun --bun run test
 ```
 
 ## Styling
@@ -34,21 +34,9 @@ This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
 This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
 
 ```bash
-pnpm lint
-pnpm format
-pnpm check
-```
-
-## Setting up Netlify
-
-First install the Netlify CLI with:
-
-```bash
-npm install -g netlify-cli`
-```
-
-```bash
-netlify init
+bun --bun run lint
+bun --bun run format
+bun --bun run check
 ```
 
 ## Shadcn
@@ -161,7 +149,7 @@ React-Query is an excellent addition or alternative to route loading and integra
 First add your dependencies:
 
 ```bash
-pnpm add @tanstack/react-query @tanstack/react-query-devtools
+bun install @tanstack/react-query @tanstack/react-query-devtools
 ```
 
 Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
@@ -242,7 +230,7 @@ Another common requirement for React applications is state management. There are
 First you need to add TanStack Store as a dependency:
 
 ```bash
-pnpm add @tanstack/store
+bun install @tanstack/store
 ```
 
 Now let's create a simple counter in the `src/App.tsx` file as a demonstration.

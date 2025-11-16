@@ -91,7 +91,7 @@ jobs:
       - name: 🚀 Start production server
         working-directory: client
         run: |
-          bun run start &
+          bun run serve -- --port 3000 &
           # Wait for the app to boot and respond
           for i in {1..10}; do
             if curl -sSf http://localhost:3000 > /dev/null; then

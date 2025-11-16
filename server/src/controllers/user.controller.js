@@ -24,7 +24,7 @@ export const getUsers = async (_req, res) => {
     return res.status(200).json({
       message: "Users fetched successfully",
       success: true,
-      data: { users },
+      data: users,
     });
   } catch (err) {
     logger.error("❌ getUsers error:", err);
@@ -45,7 +45,7 @@ export const getCurrentUser = async (req, res) => {
     return res.status(200).json({
       message: "Current user fetched successfully",
       success: true,
-      data: { user },
+      data: user,
     });
   } catch (err) {
     logger.error("❌ getCurrentUser error:", err);
@@ -90,7 +90,7 @@ export const createUser = async (req, res) => {
     return res.status(201).json({
       message: "User created successfully",
       success: true,
-      data: { user: safeUser },
+      data: safeUser,
     });
   } catch (err) {
     logger.error("❌ createUser error:", err);
@@ -128,7 +128,7 @@ export const loginUser = async (req, res) => {
     return res.status(200).json({
       message: "Login successful",
       success: true,
-      data: { user: safeUser },
+      data: safeUser,
     });
   } catch (err) {
     logger.error("❌ loginUser error:", err);

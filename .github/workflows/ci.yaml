@@ -6,12 +6,12 @@ on:
     #   - main
     #   - dev
     # paths:
-    #   - 'src/**'
+    #   - 'client/**'
+    #   - 'server/**'
     #   - 'package.json'
-    #   - 'tsconfig.json'
+    #   - 'bun.lock'
     #   - 'eslint.config.js'
-    #   - 'prettier.config.js'
-    #   - 'bun.lockb'
+    #   - '.prettierrc'
   workflow_dispatch:
 
 jobs:
@@ -33,7 +33,9 @@ jobs:
           path: |
             ~/.bun/install/cache
             node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+            client/node_modules
+            server/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -46,10 +48,15 @@ jobs:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', 'package.json') }}
 
-      - name: ✅ Code Quality Validation
-        run: bun run ci:validate
+      - name: ✅ Lint workspace
+        run: bun run lint
+
+      - name: 🧪 Client tests
+        working-directory: client
+        run: bun run test
 
       - name: 🏗️ Build project
+        working-directory: client
         run: bun run build
 
       - name: 📤 Upload build output
@@ -57,8 +64,8 @@ jobs:
         with:
           name: build-output
           path: |
-            dist
-            .output
+            client/dist
+            client/.output
 
   smoke-test:
     runs-on: ubuntu-latest
@@ -66,7 +73,7 @@ jobs:
 
     steps:
       - name: 🧾 Checkout repository
-        uses: actions/checkout@v4 # ✅ this brings back package.json, bun.lockb, etc.
+        uses: actions/checkout@v4
 
       - name: 📥 Download build output
         uses: actions/download-artifact@v4
@@ -82,10 +89,20 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: 🚀 Start production server
+        working-directory: client
         run: |
-          bun dev &
-          sleep 5
-          bunx wait-on --timeout 45000 http://localhost:3000
+          bun run start &
+          # Wait for the app to boot and respond
+          for i in {1..10}; do
+            if curl -sSf http://localhost:3000 > /dev/null; then
+              echo "✅ App is up!"
+              exit 0
+            fi
+            echo "⏳ Waiting for app to be ready..."
+            sleep 5
+          done
+          echo "❌ App did not start in time" >&2
+          exit 1
 
       - name: 🛑 Stop server
         run: kill $(lsof -t -i:3000)

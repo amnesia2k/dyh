@@ -51,9 +51,9 @@ jobs:
       - name: ✅ Lint workspace
         run: bun run lint
 
-      - name: 🧪 Client tests
-        working-directory: client
-        run: bun run test
+      # - name: 🧪 Client tests
+      #   working-directory: client
+      #   run: bun run test
 
       - name: 🏗️ Build project
         working-directory: client

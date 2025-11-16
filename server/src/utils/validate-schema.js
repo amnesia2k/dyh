@@ -51,6 +51,27 @@ export const createSermonSchema = z.object({
 
 export const updateSermonSchema = createSermonSchema.partial();
 
+// Event schemas
+export const createEventSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  location: z.string().optional().or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+  featured: z.boolean().optional(),
+});
+
+export const updateEventSchema = createEventSchema.partial();
+
+// Announcement schemas
+export const createAnnouncementSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  summary: z.string().optional().or(z.literal("")),
+  body: z.string().optional().or(z.literal("")),
+});
+
+export const updateAnnouncementSchema = createAnnouncementSchema.partial();
+
 export const createPrSchema = z
   .object({
     fullName: z.string().optional().or(z.literal("")),
@@ -88,7 +109,12 @@ export const createTestimonySchema = z.object({
   status: z.enum(["new", "read", "resolved"]).optional(),
 });
 
-export const updateTestimonySchema = createTestimonySchema.partial();
+export const updateTestimonySchema = z.object({
+  status: z.enum(["new", "read", "resolved"]).optional(),
+  featured: z.boolean().optional(),
+  approved: z.boolean().optional(),
+  approvedAt: z.string().datetime().optional(),
+});
 
 // // HOT (Head of Tribe) schemas
 // export const createHotSchema = z.object({

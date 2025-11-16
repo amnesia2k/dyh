@@ -1,44 +1,44 @@
-FROM oven/bun:latest
-
-WORKDIR /app
-
-# Copy only root + server manifests first
-COPY package.json bun.lock ./
-COPY server/package.json ./server/
-
-# Install ONLY server workspace dependencies (cached)
-RUN bun install --cwd ./server
-
-# Copy server source AFTER deps
-COPY server ./server
-
-WORKDIR /app/server
-
-EXPOSE 8000
-CMD ["bun", "dev"]
-
 # FROM oven/bun:latest
 
 # WORKDIR /app
 
-# # Copy root workspace manifests
-# COPY bun.lock ./bun.lock
-# COPY package.json ./package.json
+# # Copy only root + server manifests first
+# COPY package.json bun.lock ./
+# COPY server/package.json ./server/
 
-# # Copy ONLY server’s workspace manifest
-# COPY server/package.json ./server/package.json
-
-# # Copy the entire repo
-# COPY . .
-
-# # Install deps for server workspace
+# # Install ONLY server workspace dependencies (cached)
 # RUN bun install --cwd ./server
+
+# # Copy server source AFTER deps
+# COPY server ./server
 
 # WORKDIR /app/server
 
 # EXPOSE 8000
-
 # CMD ["bun", "dev"]
+
+FROM oven/bun:latest
+
+WORKDIR /app
+
+# Copy root workspace manifests
+COPY bun.lock ./bun.lock
+COPY package.json ./package.json
+
+# Copy ONLY server’s workspace manifest
+COPY server/package.json ./server/package.json
+
+# Copy the entire repo
+COPY . .
+
+# Install deps for server workspace
+RUN bun install --cwd ./server
+
+WORKDIR /app/server
+
+EXPOSE 8000
+
+CMD ["bun", "dev"]
 
 # FROM oven/bun:latest
 

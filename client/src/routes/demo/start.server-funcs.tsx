@@ -3,11 +3,23 @@ import { useCallback, useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-const filePath = 'todos.json'
+/*
+const loggingMiddleware = createMiddleware().server(
+  async ({ next, request }) => {
+    console.log("Request:", request.url);
+    return next();
+  }
+);
+const loggedServerFunction = createServerFn({ method: "GET" }).middleware([
+  loggingMiddleware,
+]);
+*/
+
+const TODOS_FILE = 'todos.json'
 
 async function readTodos() {
   return JSON.parse(
-    await fs.promises.readFile(filePath, 'utf-8').catch(() =>
+    await fs.promises.readFile(TODOS_FILE, 'utf-8').catch(() =>
       JSON.stringify(
         [
           { id: 1, name: 'Get groceries' },
@@ -25,11 +37,11 @@ const getTodos = createServerFn({
 }).handler(async () => await readTodos())
 
 const addTodo = createServerFn({ method: 'POST' })
-  .validator((d: string) => d)
+  .inputValidator((d: string) => d)
   .handler(async ({ data }) => {
     const todos = await readTodos()
     todos.push({ id: todos.length + 1, name: data })
-    await fs.promises.writeFile(filePath, JSON.stringify(todos, null, 2))
+    await fs.promises.writeFile(TODOS_FILE, JSON.stringify(todos, null, 2))
     return todos
   })
 

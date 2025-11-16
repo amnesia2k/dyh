@@ -3,7 +3,7 @@ services:
   # MongoDB: database
   # -------------------
   db:
-    image: mongo:latest
+    image: mongo:7
     container_name: dyh-mongo
     ports:
       - "27017:27017"
@@ -20,7 +20,7 @@ services:
   # Redis: cache & rate-limiter
   # -------------------
   redis:
-    image: redis:latest
+    image: redis:7
     container_name: dyh-redis
     ports:
       - "6379:6379"
@@ -37,7 +37,9 @@ services:
   # Backend: Express / API
   # -------------------
   api:
-    build: ./server
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
     container_name: dyh-api
     depends_on:
       - db
@@ -45,57 +47,37 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - ./server/.env
     environment:
-      NODE_ENV: development
+      # Override DB_URL from server/.env to point at the Docker Mongo service
       DB_URL: mongodb://db/dyhdb
-      JWT_SECRET: f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
-      FRONTEND_URL: http://localhost:3000
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
-      REDIS_TLS: "false"
     volumes:
       - ./server:/app
       - /app/node_modules # keep host from overriding container modules
-    command: pnpm dev # runs nodemon
+    command: bun dev # runs nodemon
 
-  worker:
-    build: ./server
-    container_name: dyh-worker
+  # -------------------
+  # Frontend: Vite
+  # -------------------
+  web:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    container_name: dyh-web
     depends_on:
-      - db
-      - redis
+      - api
     restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client/.env
     environment:
-      NODE_ENV: development
-      DB_URL: mongodb://db/dyhdb
-      JWT_SECRET: f17nLiA+tp1QzYwBqlgZ47pAzl7g99dTXthJWpFBTRY=
-      FRONTEND_URL: http://localhost:3000
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
-      REDIS_TLS: "false"
+      - IN_DOCKER=1
     volumes:
-      - ./server:/app
-      - /app/node_modules
-    command: pnpm worker:activity
-
-  # -------------------
-  # Frontend: Vite (commented for now)
-  # -------------------
-  # web:
-  #   build: ./client
-  #   container_name: dyh-web
-  #   depends_on:
-  #     - api
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
-  #     VITE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-  #   volumes:
-  #     - ./client:/app
-  #     - /app/node_modules # keep host from overriding container modules
-  #   command: pnpm dev # runs vite
+      - ./client:/app
+      - /app/node_modules # keep host from overriding container modules
+    command: bun dev # runs vite
 
   # -------------------
   # Redis Commander: GUI for Redis
@@ -121,9 +103,9 @@ services:
     depends_on:
       - db
     ports:
-      - "8082:8081" # mapped to 8082 locally
+      - "8082:8081"
     environment:
-      ME_CONFIG_MONGODB_SERVER: db
+      ME_CONFIG_MONGODB_SERVER: db       # FIXED
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: secret
@@ -132,6 +114,7 @@ services:
 volumes:
   dyhdb:
   redisdata:
+
 # Postgres Example Config
 
 # services:

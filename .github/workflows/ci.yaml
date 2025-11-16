@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    # branches:
+    #   - main
+    #   - dev
+    # paths:
+    #   - 'src/**'
+    #   - 'package.json'
+    #   - 'tsconfig.json'
+    #   - 'eslint.config.js'
+    #   - 'prettier.config.js'
+    #   - 'bun.lockb'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 🧠 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🧹 Cache ESLint results
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', 'package.json') }}
+
+      - name: ✅ Code Quality Validation
+        run: bun run ci:validate
+
+      - name: 🏗️ Build project
+        run: bun run build
+
+      - name: 📤 Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            dist
+            .output
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4 # ✅ this brings back package.json, bun.lockb, etc.
+
+      - name: 📥 Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: ⚡ Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🚀 Start production server
+        run: |
+          bun dev &
+          sleep 5
+          bunx wait-on --timeout 45000 http://localhost:3000
+
+      - name: 🛑 Stop server
+        run: kill $(lsof -t -i:3000)

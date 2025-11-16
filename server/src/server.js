@@ -6,6 +6,8 @@ import { connectToDB } from "./db/mongo.js";
 import morgan from "morgan";
 import routes from "./routes/index.route.js";
 import { env } from "./utils/env.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./utils/swagger.js";
 
 const app = express();
 
@@ -26,11 +28,26 @@ app.use(morgan("dev"));
 
 connectToDB();
 
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     summary: Root endpoint (not used directly)
+ *     description: Simple root endpoint; the main API is mounted at `/api/v1`.
+ *     responses:
+ *       200:
+ *         description: Root OK.
+ */
 app.get("/api/v1", (req, res) => {
   res.status(200).json({ message: "Hello World!" });
 });
 
 app.use("/api/v1", routes);
+
+// Swagger API docs UI.
+// After starting the server, open http://localhost:<PORT>/api-docs in the browser
+// to explore and test all documented endpoints.
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // error middleware
 app.use((err, _req, res, _next) => {

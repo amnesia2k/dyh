@@ -25,6 +25,10 @@ const ActivityLogSchema = new mongoose.Schema(
       required: true,
     },
 
+    message: {
+      type: String,
+    },
+
     meta: {
       type: mongoose.Schema.Types.Mixed,
     },

@@ -1,25 +1,25 @@
 import { Router } from "express";
 import {
-  createSermon,
-  deleteSermon,
-  getSermonById,
-  getSermons,
-  updateSermon,
-} from "../controllers/sermon.controller.js";
+  createEvent,
+  deleteEvent,
+  getEventById,
+  getEvents,
+  updateEvent,
+} from "../controllers/event.controller.js";
 import { validateRequest } from "zod-express-middleware";
-import { createSermonSchema, updateSermonSchema } from "../utils/validate-schema.js";
+import { createEventSchema, updateEventSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 /**
  * @openapi
- * /sermon:
+ * /event:
  *   get:
- *     summary: Get all sermons
- *     description: Returns all sermons, optionally filtered by a search term.
+ *     summary: Get all events
+ *     description: Returns all events, optionally searchable via text search.
  *     tags:
- *       - Sermons
+ *       - Events
  *     parameters:
  *       - in: query
  *         name: search
@@ -28,41 +28,41 @@ const router = Router();
  *         description: Full-text search term.
  *     responses:
  *       200:
- *         description: Sermons fetched successfully.
+ *         description: Events fetched successfully.
  */
-router.get("/", getSermons);
+router.get("/", getEvents);
 
 /**
  * @openapi
- * /sermon/{id}:
+ * /event/{id}:
  *   get:
- *     summary: Get a single sermon
- *     description: Fetch a single sermon by its ID.
+ *     summary: Get a single event
+ *     description: Fetch a single event by its ID.
  *     tags:
- *       - Sermons
+ *       - Events
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: Sermon ID.
+ *         description: Event ID.
  *     responses:
  *       200:
- *         description: Sermon fetched successfully.
+ *         description: Event fetched successfully.
  *       404:
- *         description: Sermon not found.
+ *         description: Event not found.
  */
-router.get("/:id", getSermonById);
+router.get("/:id", getEventById);
 
 /**
  * @openapi
- * /sermon:
+ * /event:
  *   post:
- *     summary: Create a new sermon
- *     description: Create a new sermon entry (protected route).
+ *     summary: Create a new event
+ *     description: Create a new event (protected route).
  *     tags:
- *       - Sermons
+ *       - Events
  *     security:
  *       - cookieAuth: []
  *     requestBody:
@@ -77,31 +77,29 @@ router.get("/:id", getSermonById);
  *               date:
  *                 type: string
  *                 format: date
- *               spotifyEmbedUrl:
+ *               location:
  *                 type: string
  *               description:
  *                 type: string
- *               speaker:
- *                 type: string
+ *               featured:
+ *                 type: boolean
  *             required:
  *               - title
  *               - date
  *     responses:
  *       201:
- *         description: Sermon created successfully.
- *       400:
- *         description: Validation error.
+ *         description: Event created successfully.
  */
-router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), createSermon);
+router.post("/", protectRoute, validateRequest({ body: createEventSchema }), createEvent);
 
 /**
  * @openapi
- * /sermon/{id}:
+ * /event/{id}:
  *   patch:
- *     summary: Update a sermon
- *     description: Update fields of an existing sermon (protected route).
+ *     summary: Update an event
+ *     description: Update fields of an existing event (protected route).
  *     tags:
- *       - Sermons
+ *       - Events
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -110,29 +108,29 @@ router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), cr
  *         required: true
  *         schema:
  *           type: string
- *         description: Sermon ID.
+ *         description: Event ID.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/SermonUpdate"
+ *             $ref: "#/components/schemas/EventUpdate"
  *     responses:
  *       200:
- *         description: Sermon updated successfully.
+ *         description: Event updated successfully.
  *       404:
- *         description: Sermon not found.
+ *         description: Event not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updateSermonSchema }), updateSermon);
+router.patch("/:id", protectRoute, validateRequest({ body: updateEventSchema }), updateEvent);
 
 /**
  * @openapi
- * /sermon/{id}:
+ * /event/{id}:
  *   delete:
- *     summary: Delete a sermon
- *     description: Delete a sermon by ID (protected route).
+ *     summary: Delete an event
+ *     description: Delete an event by ID (protected route).
  *     tags:
- *       - Sermons
+ *       - Events
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -141,13 +139,13 @@ router.patch("/:id", protectRoute, validateRequest({ body: updateSermonSchema })
  *         required: true
  *         schema:
  *           type: string
- *         description: Sermon ID.
+ *         description: Event ID.
  *     responses:
  *       200:
- *         description: Sermon deleted successfully.
+ *         description: Event deleted successfully.
  *       404:
- *         description: Sermon not found.
+ *         description: Event not found.
  */
-router.delete("/:id", protectRoute, deleteSermon);
+router.delete("/:id", protectRoute, deleteEvent);
 
 export default router;

@@ -29,6 +29,12 @@ const TestimonySchema = new mongoose.Schema(
       default: false,
     },
 
+    status: {
+      type: String,
+      enum: ["new", "read", "resolved"],
+      default: "new",
+    },
+
     featured: {
       type: Boolean,
       default: false,

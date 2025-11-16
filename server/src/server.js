@@ -9,7 +9,7 @@ import { env } from "./utils/env.js";
 
 const app = express();
 
-const PORT = env.PORT;
+const PORT = env.PORT || 8000;
 
 app.use(
   cors({
@@ -19,9 +19,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+
 connectToDB();
 
 app.get("/api/v1", (req, res) => {
@@ -31,7 +33,7 @@ app.get("/api/v1", (req, res) => {
 app.use("/api/v1", routes);
 
 // error middleware
-app.use((err, _req, res) => {
+app.use((err, _req, res, _next) => {
   logger.error(err);
   res.status(500).json({
     error: err.message,
@@ -45,6 +47,6 @@ app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Not Found" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   logger.info(`Server is running on port ${PORT}`);
 });

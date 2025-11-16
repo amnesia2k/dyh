@@ -79,7 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: client   # <-- FIXED: place artifact directly into client folder
+          path: client # <-- FIXED: place artifact directly into client folder
 
       - name: ⚡ Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -87,7 +87,7 @@ jobs:
           bun-version: latest
 
       - name: 📦 Install dependencies
-        working-directory: client   # <-- FIXED: install only client deps for speed + correctness
+        working-directory: client # <-- FIXED: install only client deps for speed + correctness
         run: bun install --frozen-lockfile
 
       # 🚫 Removed production server startup — too stressful, not needed

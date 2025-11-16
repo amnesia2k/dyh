@@ -18,7 +18,7 @@ export const getHots = async (_req, res) => {
     return res.status(200).json({
       message: "HOTs fetched successfully",
       success: true,
-      data: { hots },
+      data: hots,
     });
   } catch (err) {
     logger.error("❌ getHots error:", err);
@@ -36,7 +36,7 @@ export const getCurrentHot = async (req, res) => {
     return res.status(200).json({
       message: "Current HOT fetched successfully",
       success: true,
-      data: { user },
+      data: user,
     });
   } catch (err) {
     logger.error("❌ getCurrentHot error:", err);
@@ -75,7 +75,7 @@ export const registerHot = async (req, res) => {
     return res.status(201).json({
       message: "HOT created successfully",
       success: true,
-      data: { user: safeUser },
+      data: safeUser,
     });
   } catch (err) {
     logger.error("❌ createHot error:", err);
@@ -169,7 +169,7 @@ export const loginHot = async (req, res) => {
     return res.status(200).json({
       message: "Login successful",
       success: true,
-      data: { user: safeUser },
+      data: safeUser,
     });
   } catch (err) {
     logger.error("❌ loginHot error:", err);

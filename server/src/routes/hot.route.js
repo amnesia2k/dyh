@@ -96,7 +96,7 @@ router.get("/:id", getSingleHot);
  *                 type: string
  *               bio:
  *                 type: string
- *               photo:
+ *               imageUrl:
  *                 type: string
  *               phone:
  *                 type: string

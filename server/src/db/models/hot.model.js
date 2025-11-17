@@ -47,7 +47,7 @@ const HotSchema = new mongoose.Schema(
 
     lastLogin: Date,
 
-    photo: String,
+    imageUrl: String,
 
     phone: {
       type: String,

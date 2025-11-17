@@ -23,7 +23,7 @@ const AnnouncementSchema = new mongoose.Schema(
 
     body: String,
 
-    // image: String,
+    imageUrl: String,
 
     // pinned: { type: Boolean, default: false },
 

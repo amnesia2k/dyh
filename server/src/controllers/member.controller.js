@@ -14,7 +14,7 @@ export const createMember = async (req, res) => {
       birthday,
       address,
       departmentOfInterest = "none",
-      photo,
+      imageUrl,
       joinedAt,
     } = req.body;
 
@@ -45,7 +45,7 @@ export const createMember = async (req, res) => {
       birthday: parsedBirthday,
       address,
       departmentOfInterest,
-      photo,
+      imageUrl,
       joinedAt,
     });
 

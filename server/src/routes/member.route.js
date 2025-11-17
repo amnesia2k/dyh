@@ -85,9 +85,9 @@ router.get("/:id", protectRoute, getSingleMember);
  *               joinedAt:
  *                 type: string
  *                 format: date
- *               photo:
+ *               imageUrl:
  *                 type: string
- *                 description: URL to member photo.
+ *                 description: URL to member image.
  *             required:
  *               - fullName
  *     responses:

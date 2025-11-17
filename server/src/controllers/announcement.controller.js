@@ -4,7 +4,7 @@ import { logActivity } from "../utils/activity.queue.js";
 
 export const createAnnouncement = async (req, res) => {
   try {
-    const { title, date, summary, body } = req.body;
+    const { title, date, summary, body, imageUrl } = req.body;
 
     if (!title || !date) {
       return res.status(400).json({
@@ -18,6 +18,7 @@ export const createAnnouncement = async (req, res) => {
       date,
       summary,
       body,
+      imageUrl,
     });
 
     await logActivity("ANNOUNCEMENT", "NEW", announcement);

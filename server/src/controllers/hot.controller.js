@@ -47,7 +47,7 @@ export const getCurrentHot = async (req, res) => {
 
 export const registerHot = async (req, res) => {
   try {
-    const { name, email, password, tribe, bio, photo, phone } = req.body;
+    const { name, email, password, tribe, bio, imageUrl, phone } = req.body;
     if (!name || !email || !password || !tribe || !phone) {
       return res.status(400).json({
         success: false,
@@ -65,7 +65,7 @@ export const registerHot = async (req, res) => {
       passwordHash: hashed,
       tribe,
       bio,
-      photo,
+      imageUrl,
       phone,
     });
     const token = generateToken(newHot._id);

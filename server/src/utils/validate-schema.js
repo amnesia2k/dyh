@@ -7,7 +7,7 @@ export const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   tribe: z.string().min(1, "Tribe is required"),
   bio: z.string().optional(),
-  photo: z.url("Invalid photo URL").optional().or(z.literal("")),
+  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
   phone: z.string().optional(),
 });
 
@@ -35,7 +35,7 @@ export const createMemberSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
     .optional()
     .or(z.literal("")),
-  photo: z.url("Invalid photo URL").optional().or(z.literal("")),
+  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
 });
 
 export const updateMemberSchema = createMemberSchema.partial();
@@ -58,6 +58,7 @@ export const createEventSchema = z.object({
   location: z.string().optional().or(z.literal("")),
   description: z.string().optional().or(z.literal("")),
   featured: z.boolean().optional(),
+  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
 });
 
 export const updateEventSchema = createEventSchema.partial();
@@ -68,6 +69,7 @@ export const createAnnouncementSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
   summary: z.string().optional().or(z.literal("")),
   body: z.string().optional().or(z.literal("")),
+  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
 });
 
 export const updateAnnouncementSchema = createAnnouncementSchema.partial();
@@ -113,7 +115,10 @@ export const updateTestimonySchema = z.object({
   status: z.enum(["new", "read", "resolved"]).optional(),
   featured: z.boolean().optional(),
   approved: z.boolean().optional(),
-  approvedAt: z.string().datetime().optional(),
+  approvedAt: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+    .optional(),
 });
 
 // // HOT (Head of Tribe) schemas

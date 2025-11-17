@@ -81,6 +81,9 @@ router.get("/:id", getAnnouncementById);
  *                 type: string
  *               body:
  *                 type: string
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL to announcement image.
  *             required:
  *               - title
  *               - date

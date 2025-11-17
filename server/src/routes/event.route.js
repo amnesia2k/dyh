@@ -83,6 +83,9 @@ router.get("/:id", getEventById);
  *                 type: string
  *               featured:
  *                 type: boolean
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL to event image.
  *             required:
  *               - title
  *               - date

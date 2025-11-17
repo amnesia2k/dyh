@@ -1,5 +1,6 @@
 import Sermon from "../db/models/sermon.model.js";
 import { logger } from "../utils/logger.js";
+import { logActivity } from "../utils/activity.queue.js";
 
 /**
  * @desc Create a new sermon
@@ -20,6 +21,8 @@ export const createSermon = async (req, res) => {
       description,
       speaker,
     });
+
+    await logActivity("SERMON", "NEW", sermon);
 
     logger.info("Sermon created:", sermon._id);
     res.status(201).json({ message: "Sermon created", success: true, data: sermon });
@@ -71,6 +74,8 @@ export const getSermonById = async (req, res) => {
       return res.status(404).json({ message: "Sermon not found", success: false });
     }
 
+    await logActivity("SERMON", "UPDATED", sermon);
+
     logger.info("Fetched sermon:", sermon._id);
     res.status(200).json({ message: "Sermon fetched", success: true, data: sermon });
   } catch (error) {
@@ -94,6 +99,8 @@ export const updateSermon = async (req, res) => {
     if (!sermon) {
       return res.status(404).json({ message: "Sermon not found", success: false });
     }
+
+    await logActivity("SERMON", "DELETED", sermon);
 
     logger.info("Updated sermon:", sermon._id);
     res.status(200).json({ message: "Sermon updated", success: true, data: sermon });

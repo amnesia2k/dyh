@@ -6,7 +6,12 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET,
   NODE_ENV: process.env.NODE_ENV,
   FRONTEND_URL: process.env.FRONTEND_URL,
+  API_URL: process.env.API_URL,
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_TLS: process.env.REDIS_TLS,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+  CLOUDINARY_FOLDER: process.env.CLOUDINARY_FOLDER,
 };

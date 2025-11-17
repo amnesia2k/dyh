@@ -2,6 +2,7 @@ import Hot from "../db/models/hot.model.js";
 import { generateToken } from "../utils/generate-token.js";
 import bcrypt from "bcryptjs";
 import { logger } from "../utils/logger.js";
+import { logActivity } from "../utils/activity.queue.js";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -46,7 +47,7 @@ export const getCurrentHot = async (req, res) => {
 
 export const registerHot = async (req, res) => {
   try {
-    const { name, email, password, tribe, bio, photo, phone } = req.body;
+    const { name, email, password, tribe, bio, imageUrl, phone } = req.body;
     if (!name || !email || !password || !tribe || !phone) {
       return res.status(400).json({
         success: false,
@@ -64,7 +65,7 @@ export const registerHot = async (req, res) => {
       passwordHash: hashed,
       tribe,
       bio,
-      photo,
+      imageUrl,
       phone,
     });
     const token = generateToken(newHot._id);
@@ -72,6 +73,8 @@ export const registerHot = async (req, res) => {
     const safeUser = newHot.toObject();
     delete safeUser.passwordHash;
     safeUser.token = token;
+
+    await logActivity("HOT", "NEW", newHot);
     return res.status(201).json({
       message: "HOT created successfully",
       success: true,
@@ -118,6 +121,8 @@ export const updateHot = async (req, res) => {
 
     delete updated.passwordHash;
 
+    await logActivity("HOT", "UPDATED", updated);
+
     res.status(200).json({
       message: "HOT updated successfully",
       success: true,
@@ -136,6 +141,8 @@ export const deleteHot = async (req, res) => {
     if (!hot) {
       return res.status(404).json({ message: "HOT not found", success: false });
     }
+
+    await logActivity("HOT", "DELETED", hot);
 
     res.status(200).json({ message: "HOT deleted successfully", success: true });
   } catch (err) {

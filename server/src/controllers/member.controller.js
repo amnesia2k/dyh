@@ -1,5 +1,6 @@
 import Member from "../db/models/member.model.js";
 import { logger } from "../utils/logger.js";
+import { logActivity } from "../utils/activity.queue.js";
 
 /**
  * Create a new member
@@ -13,7 +14,7 @@ export const createMember = async (req, res) => {
       birthday,
       address,
       departmentOfInterest = "none",
-      photo,
+      imageUrl,
       joinedAt,
     } = req.body;
 
@@ -44,9 +45,11 @@ export const createMember = async (req, res) => {
       birthday: parsedBirthday,
       address,
       departmentOfInterest,
-      photo,
+      imageUrl,
       joinedAt,
     });
+
+    await logActivity("MEMBER", "NEW", member);
 
     return res.status(201).json({
       message: "Member created successfully",
@@ -134,6 +137,8 @@ export const updateMember = async (req, res) => {
       });
     }
 
+    await logActivity("MEMBER", "UPDATED", updatedMember);
+
     return res.status(200).json({
       message: "Member updated successfully",
       success: true,
@@ -163,6 +168,8 @@ export const deleteMember = async (req, res) => {
         success: false,
       });
     }
+
+    await logActivity("MEMBER", "DELETED", deletedMember);
 
     return res.status(200).json({
       message: "Member deleted successfully",

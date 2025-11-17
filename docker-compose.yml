@@ -53,9 +53,9 @@ services:
       # Override DB_URL from server/.env to point at the Docker Mongo service
       DB_URL: mongodb://db/dyhdb
     volumes:
-      - ./server:/app/server
-      # - ./server:/app
-      # - /app/node_modules # keep host from overriding container modules
+      # - ./server:/app/server
+      - ./server:/app
+      - /app/node_modules # keep host from overriding container modules
     command: bun dev # runs nodemon
 
   # -------------------
@@ -76,9 +76,9 @@ services:
     environment:
       - IN_DOCKER=1
     volumes:
-      - ./client:/app/client
-      # - ./client:/app
-      # - /app/node_modules # keep host from overriding container modules
+      # - ./client:/app/client
+      - ./client:/app
+      - /app/node_modules # keep host from overriding container modules
     command: bun dev # runs vite
 
   # -------------------

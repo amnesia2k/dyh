@@ -130,6 +130,18 @@ Base: `/testimony`
 
 ---
 
+## Image Uploads
+
+Base: `/upload`
+
+- `POST /upload/image`
+  - Upload a single image file (as `multipart/form-data` with field name `image`).
+  - Stores the image in Cloudinary and returns an `imageUrl` (plus metadata) to use in other JSON APIs.
+  - Typical flow: first call this endpoint to get an `imageUrl`, then send that URL in bodies for members, events, announcements, or HoT profile updates.
+  - For implementation and environment details, see `server/UPLOADS.md`.
+
+---
+
 ## Activities
 
 Base: `/activity` (protected)

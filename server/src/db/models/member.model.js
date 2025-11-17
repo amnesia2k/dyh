@@ -38,7 +38,7 @@ const MemberSchema = new mongoose.Schema(
 
     // tags: [String],
 
-    photo: String,
+    imageUrl: String,
 
     // createdBy: {
     //   type: String, ref: "User"

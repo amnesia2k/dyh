@@ -7,6 +7,7 @@ import testimonyRoute from "./testimony.route.js";
 import activityRoute from "./activity.route.js";
 import eventRoute from "./event.route.js";
 import announcementRoute from "./announcement.route.js";
+import uploadRoute from "./upload.route.js";
 
 // import messageRoutes from "./contact.route.js";
 
@@ -20,6 +21,7 @@ router.use("/testimony", testimonyRoute);
 router.use("/activity", activityRoute);
 router.use("/event", eventRoute);
 router.use("/announcement", announcementRoute);
+router.use("/upload", uploadRoute);
 
 // router.use("/message", messageRoutes);
 

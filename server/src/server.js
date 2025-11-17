@@ -6,6 +6,7 @@ import { connectToDB } from "./db/mongo.js";
 import morgan from "morgan";
 import routes from "./routes/index.route.js";
 import { env } from "./utils/env.js";
+import { startKeepAliveJob } from "./utils/keep-alive.cron.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./utils/swagger.js";
 
@@ -66,4 +67,7 @@ app.use((_req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   logger.info(`Server is running on port ${PORT}`);
+
+  // Start the keep-alive cron job (only runs in production).
+  startKeepAliveJob();
 });

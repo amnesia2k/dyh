@@ -23,6 +23,8 @@ const EventSchema = new mongoose.Schema(
 
     description: String,
 
+    imageUrl: String,
+
     featured: {
       type: Boolean,
       default: false,

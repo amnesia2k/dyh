@@ -4,7 +4,7 @@ import { logActivity } from "../utils/activity.queue.js";
 
 export const createEvent = async (req, res) => {
   try {
-    const { title, date, location, description, featured } = req.body;
+    const { title, date, location, description, featured, imageUrl } = req.body;
 
     if (!title || !date) {
       return res.status(400).json({
@@ -19,6 +19,7 @@ export const createEvent = async (req, res) => {
       location,
       description,
       featured,
+      imageUrl,
     });
 
     await logActivity("EVENT", "NEW", event);

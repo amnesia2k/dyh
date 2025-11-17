@@ -39,7 +39,7 @@ const swaggerDefinition = {
           address: { type: "string" },
           departmentOfInterest: { type: "string" },
           joinedAt: { type: "string", format: "date" },
-          photo: { type: "string", description: "URL to member photo" },
+          imageUrl: { type: "string", description: "URL to member image" },
         },
       },
       SermonUpdate: {
@@ -60,6 +60,7 @@ const swaggerDefinition = {
           location: { type: "string" },
           description: { type: "string" },
           featured: { type: "boolean" },
+          imageUrl: { type: "string", description: "URL to event image" },
         },
       },
       AnnouncementUpdate: {
@@ -69,6 +70,7 @@ const swaggerDefinition = {
           date: { type: "string", format: "date" },
           summary: { type: "string" },
           body: { type: "string" },
+          imageUrl: { type: "string", description: "URL to announcement image" },
         },
       },
       PrayerRequestUpdate: {
@@ -91,7 +93,7 @@ const swaggerDefinition = {
           email: { type: "string", format: "email" },
           tribe: { type: "string" },
           bio: { type: "string" },
-          photo: { type: "string" },
+          imageUrl: { type: "string" },
           phone: { type: "string" },
           role: { type: "string", description: "Role of the HOT (e.g., admin)" },
         },

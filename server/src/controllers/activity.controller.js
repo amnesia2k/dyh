@@ -1,18 +1,13 @@
 import ActivityLog from "../db/models/activity.model.js";
+import { response } from "../utils/response.js";
 
-export const getAllActivities = async (req, res) => {
+export const getAllActivities = async (_req, res) => {
   try {
     const activities = await ActivityLog.find().sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      message: "Activities fetched successfully",
-      success: true,
-      data: activities,
-    });
+    return response(res, 200, "Activities fetched successfully", activities);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get activities",
+    return response(res, 500, "Failed to get activities", undefined, {
       error: error.message,
     });
   }

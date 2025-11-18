@@ -1,16 +1,14 @@
 import { PrayerRequest } from "../db/models/pr.model.js";
 import { logActivity } from "../utils/activity.queue.js";
 import { logger } from "../utils/logger.js";
+import { response } from "../utils/response.js";
 
 export const createPR = async (req, res) => {
   try {
     const { fullName, email, message } = req.body;
 
     if (!fullName || !email || !message) {
-      return res.status(400).json({
-        message: "All fields are required.",
-        success: false,
-      });
+      return response(res, 400, "All fields are required.");
     }
 
     const pr = await PrayerRequest.create({
@@ -20,17 +18,11 @@ export const createPR = async (req, res) => {
       // anonymous,
     });
 
-    await logActivity("PRAYER_REQUEST", "NEW", pr);
+    logActivity("PRAYER_REQUEST", "NEW", pr);
 
-    return res.status(201).json({
-      message: "Prayer Request created successfully",
-      success: true,
-      data: pr,
-    });
+    return response(res, 201, "Prayer Request created successfully", pr);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create Prayer Request",
+    return response(res, 500, "Failed to create Prayer Request", undefined, {
       error: error.message,
     });
   }
@@ -45,16 +37,11 @@ export const getAllPRs = async (req, res) => {
 
     logger.info(`Total Prayer Requests: ${totalRequests}`);
 
-    return res.status(200).json({
-      message: "Prayer requests fetched successfully",
-      success: true,
+    return response(res, 200, "Prayer requests fetched successfully", prayerRequests, {
       count: totalRequests,
-      data: prayerRequests,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get Prayer Requests",
+    return response(res, 500, "Failed to get Prayer Requests", undefined, {
       error: error.message,
     });
   }
@@ -65,21 +52,12 @@ export const getSinglePR = async (req, res) => {
     const request = await PrayerRequest.findById(req.params.id);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Prayer request not found",
-        success: false,
-      });
+      return response(res, 404, "Prayer request not found");
     }
 
-    return res.status(200).json({
-      message: "Prayer Request fetched successfully",
-      success: true,
-      data: request,
-    });
+    return response(res, 200, "Prayer Request fetched successfully", request);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get Prayer Request",
+    return response(res, 500, "Failed to get Prayer Request", undefined, {
       error: error.message,
     });
   }
@@ -95,23 +73,14 @@ export const updatePRStatus = async (req, res) => {
     });
 
     if (!request) {
-      return res.status(404).json({
-        message: "Prayer request not found",
-        success: false,
-      });
+      return response(res, 404, "Prayer request not found");
     }
 
-    await logActivity("PRAYER_REQUEST", "UPDATED", request);
+    logActivity("PRAYER_REQUEST", "UPDATED", request);
 
-    return res.status(200).json({
-      message: "Prayer Request updated successfully",
-      success: true,
-      data: request,
-    });
+    return response(res, 200, "Prayer Request updated successfully", request);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update Prayer Request",
+    return response(res, 500, "Failed to update Prayer Request", undefined, {
       error: error.message,
     });
   }

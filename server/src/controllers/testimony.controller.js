@@ -1,16 +1,14 @@
 import { Testimony } from "../db/models/testimony.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { response } from "../utils/response.js";
 
 export const createTestimony = async (req, res) => {
   try {
     const { fullName, email, message, anonymous, status } = req.body;
 
     if (!fullName || !email || !message) {
-      return res.status(400).json({
-        message: "All fields are required.",
-        success: false,
-      });
+      return response(res, 400, "All fields are required.");
     }
 
     const testimony = await Testimony.create({
@@ -21,18 +19,12 @@ export const createTestimony = async (req, res) => {
       status,
     });
 
-    await logActivity("TESTIMONY", "NEW", testimony);
+    logActivity("TESTIMONY", "NEW", testimony);
 
-    return res.status(201).json({
-      message: "Testimony created successfully",
-      success: true,
-      data: testimony,
-    });
+    return response(res, 201, "Testimony created successfully", testimony);
   } catch (error) {
     logger.error("Failed to create Testimony:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create Testimony",
+    return response(res, 500, "Failed to create Testimony", undefined, {
       error: error.message,
     });
   }
@@ -45,17 +37,12 @@ export const getTestimonies = async (_req, res) => {
 
     logger.info(`Total Testimonies: ${count}`);
 
-    return res.status(200).json({
-      message: "Testimonies fetched successfully",
-      success: true,
+    return response(res, 200, "Testimonies fetched successfully", testimonies, {
       count,
-      data: testimonies,
     });
   } catch (error) {
     logger.error("Failed to get Testimonies:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get Testimonies",
+    return response(res, 500, "Failed to get Testimonies", undefined, {
       error: error.message,
     });
   }
@@ -66,22 +53,13 @@ export const getTestimonyById = async (req, res) => {
     const testimony = await Testimony.findById(req.params.id);
 
     if (!testimony) {
-      return res.status(404).json({
-        message: "Testimony not found",
-        success: false,
-      });
+      return response(res, 404, "Testimony not found");
     }
 
-    return res.status(200).json({
-      message: "Testimony fetched successfully",
-      success: true,
-      data: testimony,
-    });
+    return response(res, 200, "Testimony fetched successfully", testimony);
   } catch (error) {
     logger.error("Failed to get Testimony:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get Testimony",
+    return response(res, 500, "Failed to get Testimony", undefined, {
       error: error.message,
     });
   }
@@ -102,24 +80,15 @@ export const updateTestimony = async (req, res) => {
     });
 
     if (!testimony) {
-      return res.status(404).json({
-        message: "Testimony not found",
-        success: false,
-      });
+      return response(res, 404, "Testimony not found");
     }
 
-    await logActivity("TESTIMONY", "UPDATED", testimony);
+    logActivity("TESTIMONY", "UPDATED", testimony);
 
-    return res.status(200).json({
-      message: "Testimony updated successfully",
-      success: true,
-      data: testimony,
-    });
+    return response(res, 200, "Testimony updated successfully", testimony);
   } catch (error) {
     logger.error("Failed to update Testimony:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update Testimony",
+    return response(res, 500, "Failed to update Testimony", undefined, {
       error: error.message,
     });
   }
@@ -132,23 +101,15 @@ export const deleteTestimony = async (req, res) => {
     const testimony = await Testimony.findByIdAndDelete(id);
 
     if (!testimony) {
-      return res.status(404).json({
-        message: "Testimony not found",
-        success: false,
-      });
+      return response(res, 404, "Testimony not found");
     }
 
-    await logActivity("TESTIMONY", "DELETED", testimony);
+    logActivity("TESTIMONY", "DELETED", testimony);
 
-    return res.status(200).json({
-      message: "Testimony deleted successfully",
-      success: true,
-    });
+    return response(res, 200, "Testimony deleted successfully");
   } catch (error) {
     logger.error("Failed to delete Testimony:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete Testimony",
+    return response(res, 500, "Failed to delete Testimony", undefined, {
       error: error.message,
     });
   }

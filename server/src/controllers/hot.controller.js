@@ -3,6 +3,7 @@ import { generateToken } from "../utils/generate-token.js";
 import bcrypt from "bcryptjs";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { response } from "../utils/response.js";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -16,32 +17,24 @@ export const getHots = async (_req, res) => {
   try {
     const hots = await Hot.find().select("-passwordHash");
 
-    return res.status(200).json({
-      message: "HOTs fetched successfully",
-      success: true,
-      data: hots,
-    });
+    return response(res, 200, "HOTs fetched successfully", hots);
   } catch (err) {
     logger.error("❌ getHots error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return response(res, 500, "Internal server error");
   }
 };
 
 export const getCurrentHot = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized: No user found" });
+      return response(res, 401, "Unauthorized: No user found");
     }
     const user = req.user.toObject();
     delete user.passwordHash;
-    return res.status(200).json({
-      message: "Current HOT fetched successfully",
-      success: true,
-      data: user,
-    });
+    return response(res, 200, "Current HOT fetched successfully", user);
   } catch (err) {
     logger.error("❌ getCurrentHot error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return response(res, 500, "Internal server error");
   }
 };
 
@@ -49,14 +42,11 @@ export const registerHot = async (req, res) => {
   try {
     const { name, email, password, tribe, bio, imageUrl, phone } = req.body;
     if (!name || !email || !password || !tribe || !phone) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email, password and tribe are required.",
-      });
+      return response(res, 400, "Name, email, password and tribe are required.");
     }
     const existing = await Hot.findOne({ email });
     if (existing) {
-      return res.status(400).json({ success: false, message: "Email address already in use." });
+      return response(res, 400, "Email address already in use.");
     }
     const hashed = await bcrypt.hash(password, 10);
     const newHot = await Hot.create({
@@ -74,15 +64,11 @@ export const registerHot = async (req, res) => {
     delete safeUser.passwordHash;
     safeUser.token = token;
 
-    await logActivity("HOT", "NEW", newHot);
-    return res.status(201).json({
-      message: "HOT created successfully",
-      success: true,
-      data: safeUser,
-    });
+    logActivity("HOT", "NEW", newHot);
+    return response(res, 201, "HOT created successfully", safeUser);
   } catch (err) {
     logger.error("❌ createHot error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return response(res, 500, "Internal server error");
   }
 };
 
@@ -90,14 +76,14 @@ export const getSingleHot = async (req, res) => {
   try {
     const hot = await Hot.findById(req.params.id);
     if (!hot) {
-      return res.status(404).json({ message: "HOT not found", success: false });
+      return response(res, 404, "HOT not found");
     }
     const safe = hot.toObject();
     delete safe.passwordHash;
-    res.status(200).json({ message: "HOT fetched successfully", success: true, data: safe });
+    return response(res, 200, "HOT fetched successfully", safe);
   } catch (err) {
     logger.error("❌ getSingleHot error:", err);
-    res.status(500).json({ message: "Server error", success: false });
+    return response(res, 500, "Server error");
   }
 };
 
@@ -106,7 +92,7 @@ export const updateHot = async (req, res) => {
     const hot = await Hot.findById(req.params.id);
 
     if (!hot) {
-      return res.status(404).json({ message: "HOT not found", success: false });
+      return response(res, 404, "HOT not found");
     }
 
     Object.assign(hot, req.body);
@@ -121,16 +107,12 @@ export const updateHot = async (req, res) => {
 
     delete updated.passwordHash;
 
-    await logActivity("HOT", "UPDATED", updated);
+    logActivity("HOT", "UPDATED", updated);
 
-    res.status(200).json({
-      message: "HOT updated successfully",
-      success: true,
-      data: updated,
-    });
+    return response(res, 200, "HOT updated successfully", updated);
   } catch (err) {
     logger.error("❌ updateHot error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    return response(res, 500, "Server error");
   }
 };
 
@@ -139,31 +121,28 @@ export const deleteHot = async (req, res) => {
     const hot = await Hot.findByIdAndDelete(req.params.id);
 
     if (!hot) {
-      return res.status(404).json({ message: "HOT not found", success: false });
+      return response(res, 404, "HOT not found");
     }
 
-    await logActivity("HOT", "DELETED", hot);
+    logActivity("HOT", "DELETED", hot);
 
-    res.status(200).json({ message: "HOT deleted successfully", success: true });
+    return response(res, 200, "HOT deleted successfully");
   } catch (err) {
     logger.error("❌ deleteHot error:", err);
-    res.status(500).json({ message: "Server error", success: false });
+    return response(res, 500, "Server error");
   }
 };
 
 export const loginHot = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res.status(400).json({ success: false, message: "Email and password are required." });
+    if (!email || !password) return response(res, 400, "Email and password are required.");
 
     const hot = await Hot.findOne({ email }).select("+passwordHash");
-    if (!hot)
-      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    if (!hot) return response(res, 401, "Invalid email or password.");
 
     const isMatch = await hot.comparePassword(password);
-    if (!isMatch)
-      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    if (!isMatch) return response(res, 401, "Invalid email or password.");
 
     hot.lastLogin = new Date();
     await hot.save();
@@ -173,14 +152,10 @@ export const loginHot = async (req, res) => {
     const safeUser = hot.toObject();
     delete safeUser.passwordHash;
     safeUser.token = token;
-    return res.status(200).json({
-      message: "Login successful",
-      success: true,
-      data: safeUser,
-    });
+    return response(res, 200, "Login successful", safeUser);
   } catch (err) {
     logger.error("❌ loginHot error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return response(res, 500, "Internal server error");
   }
 };
 
@@ -192,9 +167,9 @@ export const logoutHot = async (_req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
-    return res.status(200).json({ success: true, message: "Logout successful" });
+    return response(res, 200, "Logout successful");
   } catch (err) {
     logger.error("❌ logoutHot error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return response(res, 500, "Internal server error");
   }
 };

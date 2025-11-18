@@ -4,22 +4,40 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'
 
-export type ApiSuccessResponse<TData = unknown> = {
+/**
+ * Matches the shared `response()` helper on the server:
+ * - `success` + `message` are always present
+ * - `data` is the 4th argument
+ * - any 5th-arg "extra" fields (like `count`, `error`, etc.) are merged
+ *   into the top-level payload
+ */
+export type ApiSuccessResponse<
+  TData = unknown,
+  TExtra extends Record<string, unknown> = {
+    count?: number
+  },
+> = {
   success: true
   message: string
   data?: TData
-  count?: number
-}
+} & TExtra
 
-export type ApiErrorResponse = {
+export type ApiErrorResponse<
+  TExtra extends Record<string, unknown> = {
+    error?: string
+  },
+> = {
   success: false
   message: string
-  error?: string
-}
+} & TExtra
 
-export type ApiResponse<TData = unknown> =
-  | ApiSuccessResponse<TData>
-  | ApiErrorResponse
+export type ApiResponse<
+  TData = unknown,
+  TExtra extends Record<string, unknown> = {
+    count?: number
+    error?: string
+  },
+> = ApiSuccessResponse<TData, TExtra> | ApiErrorResponse<TExtra>
 
 export class ApiError<TData = unknown> extends Error {
   status?: number
@@ -43,6 +61,11 @@ const api: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  /**
+   * Let the backend-controlled `success` flag decide logical success.
+   * We still propagate network/protocol errors via interceptors.
+   */
+  validateStatus: () => true,
 })
 
 let accessToken: string | null = null
@@ -75,14 +98,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       const res = error.response as AxiosResponse<ApiResponse<unknown>>
-      const payload = res.data as Partial<ApiErrorResponse> &
-        Partial<ApiSuccessResponse<unknown>>
+      const payload = res.data
+      const { message: payloadMessage, error: payloadError } = payload as {
+        message?: string
+        error?: string
+      }
 
       const message =
-        (typeof payload.message === 'string' && payload.message) ||
-        (typeof payload.error === 'string' && payload.error) ||
-        error.message ||
-        'Request failed'
+        payloadMessage ?? payloadError ?? error.message ?? 'Request failed'
 
       // Optionally clear token on auth failures so callers can react
       if (res.status === 401 || res.status === 403) {

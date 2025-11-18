@@ -9,6 +9,7 @@ import { env } from "./utils/env.js";
 import { startKeepAliveJob } from "./utils/keep-alive.cron.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./utils/swagger.js";
+import { isCustomError, response } from "./utils/response.js";
 
 const app = express();
 
@@ -40,7 +41,7 @@ connectToDB();
  *         description: Root OK.
  */
 app.get("/api/v1", (req, res) => {
-  res.status(200).json({ message: "Hello World!" });
+  response(res, 200, "Hello World!");
 });
 
 app.use("/api/v1", routes);
@@ -53,16 +54,21 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // error middleware
 app.use((err, _req, res, _next) => {
   logger.error(err);
-  res.status(500).json({
+
+  if (isCustomError(err)) {
+    return response(res, err.statusCode, err.message, undefined, {
+      error: err.details ?? err.message,
+    });
+  }
+
+  return response(res, 500, "Internal Server Error", undefined, {
     error: err.message,
-    success: false,
-    message: "Internal Server Error",
   });
 });
 
 // not found middleware
 app.use((_req, res) => {
-  res.status(404).json({ success: false, message: "Not Found" });
+  return response(res, 404, "Not Found");
 });
 
 app.listen(PORT, "0.0.0.0", () => {

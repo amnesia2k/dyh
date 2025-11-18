@@ -8,11 +8,11 @@ import activityRoute from "./activity.route.js";
 import eventRoute from "./event.route.js";
 import announcementRoute from "./announcement.route.js";
 import uploadRoute from "./upload.route.js";
-
-// import messageRoutes from "./contact.route.js";
+import healthRoute from "./health.route.js";
 
 const router = Router();
 
+router.use("/health", healthRoute);
 router.use("/member", memberRoutes);
 router.use("/hot", hotRoutes);
 router.use("/sermon", sermonRoute);
@@ -22,7 +22,5 @@ router.use("/activity", activityRoute);
 router.use("/event", eventRoute);
 router.use("/announcement", announcementRoute);
 router.use("/upload", uploadRoute);
-
-// router.use("/message", messageRoutes);
 
 export default router;

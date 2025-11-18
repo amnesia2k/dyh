@@ -6,6 +6,23 @@ Base URL: `/api/v1`
 
 ---
 
+## Common Response Pattern
+
+Unless noted otherwise, JSON responses from the API follow this structure:
+
+```json
+{
+  "message": "Human-readable status",
+  "success": true,
+  "data": {},        // object or array, or omitted
+  "count": 0         // only for list endpoints
+}
+```
+
+On errors, `success` is `false`, `message` contains a short explanation, and some endpoints also include an `error` string with technical details.
+
+---
+
 ## Authentication & HoT (Head of Tribe)
 
 Base: `/hot`
@@ -27,6 +44,137 @@ Base: `/hot`
 - `DELETE /hot/:id`
   - Delete a HoT (protected, admin-only destructive action).
 
+**HoT object (`Hot`)**
+
+```json
+{
+  "_id": "string",
+  "name": "string",
+  "email": "string",
+  "tribe": "string",
+  "bio": "string",
+  "role": "admin | hot",
+  "imageUrl": "string | null",
+  "phone": "string",
+  "lastLogin": "ISO datetime or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+When returned from `POST /hot/register` or `POST /hot/login`, the `data` object also includes:
+
+```json
+{
+  "token": "JWT access token"
+}
+```
+
+**HoT request bodies**
+
+- `POST /hot/register` body:
+
+  ```json
+  {
+    "name": "string",
+    "email": "string",
+    "password": "string (min 8 chars)",
+    "tribe": "string",
+    "phone": "string",
+    "bio": "string (optional)",
+    "imageUrl": "string URL (optional)"
+  }
+  ```
+
+- `POST /hot/login` body:
+
+  ```json
+  {
+    "email": "string",
+    "password": "string"
+  }
+  ```
+
+- `PATCH /hot/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "name": "string",
+    "email": "string",
+    "tribe": "string",
+    "bio": "string",
+    "imageUrl": "string URL",
+    "phone": "string",
+    "role": "admin | hot"
+  }
+  ```
+
+**HoT success responses**
+
+- `GET /hot`, `GET /hot/me`, `GET /hot/:id`:
+
+  ```json
+  {
+    "message": "HOTs fetched successfully",
+    "success": true,
+    "data": [Hot]
+  }
+  ```
+
+  ```json
+  {
+    "message": "HOT fetched successfully",
+    "success": true,
+    "data": Hot
+  }
+  ```
+
+- `POST /hot/register`, `POST /hot/login`:
+
+  ```json
+  {
+    "message": "HOT created successfully",
+    "success": true,
+    "data": {
+      "_id": "string",
+      "name": "string",
+      "email": "string",
+      "tribe": "string",
+      "role": "admin | hot",
+      "token": "JWT access token",
+      "...": "other Hot fields"
+    }
+  }
+  ```
+
+- `POST /hot/logout`:
+
+  ```json
+  {
+    "success": true,
+    "message": "Logout successful"
+  }
+  ```
+
+- `PATCH /hot/:id`:
+
+  ```json
+  {
+    "message": "HOT updated successfully",
+    "success": true,
+    "data": Hot
+  }
+  ```
+
+- `DELETE /hot/:id`:
+
+  ```json
+  {
+    "message": "HOT deleted successfully",
+    "success": true
+  }
+  ```
+
 ---
 
 ## Members
@@ -43,6 +191,108 @@ Base: `/member` (most routes require authentication)
   - Update member details (protected).
 - `DELETE /member/:id`
   - Delete a member record (protected).
+
+**Member object (`Member`)**
+
+```json
+{
+  "_id": "string",
+  "fullName": "string",
+  "email": "string | null",
+  "phone": "string | null",
+  "birthday": "ISO date string or null",
+  "address": "string | null",
+  "departmentOfInterest": "string | null",
+  "joinedAt": "ISO date string",
+  "imageUrl": "string URL or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Member request bodies**
+
+- `POST /member` body:
+
+  ```json
+  {
+    "fullName": "string",
+    "email": "string",
+    "phone": "string",
+    "birthday": "YYYY-MM-DD",
+    "address": "string",
+    "departmentOfInterest": "string (optional)",
+    "joinedAt": "YYYY-MM-DD (optional)",
+    "imageUrl": "string URL (optional)"
+  }
+  ```
+
+- `PATCH /member/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "fullName": "string",
+    "email": "string",
+    "phone": "string",
+    "birthday": "YYYY-MM-DD",
+    "address": "string",
+    "departmentOfInterest": "string",
+    "joinedAt": "YYYY-MM-DD",
+    "imageUrl": "string URL"
+  }
+  ```
+
+**Member success responses**
+
+- `GET /member`:
+
+  ```json
+  {
+    "message": "Members fetched successfully",
+    "success": true,
+    "count": 42,
+    "data": [Member]
+  }
+  ```
+
+- `GET /member/:id`:
+
+  ```json
+  {
+    "message": "Member fetched successfully",
+    "success": true,
+    "data": Member
+  }
+  ```
+
+- `POST /member`:
+
+  ```json
+  {
+    "message": "Member created successfully",
+    "success": true,
+    "data": Member
+  }
+  ```
+
+- `PATCH /member/:id`:
+
+  ```json
+  {
+    "message": "Member updated successfully",
+    "success": true,
+    "data": Member
+  }
+  ```
+
+- `DELETE /member/:id`:
+
+  ```json
+  {
+    "message": "Member deleted successfully",
+    "success": true
+  }
+  ```
 
 ---
 
@@ -61,6 +311,101 @@ Base: `/sermon`
 - `DELETE /sermon/:id`
   - Delete a sermon (protected).
 
+**Sermon object (`Sermon`)**
+
+```json
+{
+  "_id": "string",
+  "title": "string",
+  "date": "ISO date string",
+  "spotifyEmbedUrl": "string URL or null",
+  "description": "string | null",
+  "speaker": "string | null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Sermon request bodies**
+
+- `POST /sermon` body (all fields required in practice):
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "spotifyEmbedUrl": "string URL",
+    "description": "string",
+    "speaker": "string"
+  }
+  ```
+
+- `PATCH /sermon/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "spotifyEmbedUrl": "string URL",
+    "description": "string",
+    "speaker": "string"
+  }
+  ```
+
+**Sermon success responses**
+
+- `GET /sermon`:
+
+  ```json
+  {
+    "message": "Sermons fetched",
+    "success": true,
+    "count": 10,
+    "data": [Sermon]
+  }
+  ```
+
+  Optional query: `?search=string` for full-text search.
+
+- `GET /sermon/:id`:
+
+  ```json
+  {
+    "message": "Sermon fetched",
+    "success": true,
+    "data": Sermon
+  }
+  ```
+
+- `POST /sermon`:
+
+  ```json
+  {
+    "message": "Sermon created",
+    "success": true,
+    "data": Sermon
+  }
+  ```
+
+- `PATCH /sermon/:id`:
+
+  ```json
+  {
+    "message": "Sermon updated",
+    "success": true,
+    "data": Sermon
+  }
+  ```
+
+- `DELETE /sermon/:id`:
+
+  ```json
+  {
+    "message": "Sermon deleted",
+    "success": true
+  }
+  ```
+
 ---
 
 ## Events
@@ -77,6 +422,104 @@ Base: `/event`
   - Edit/update event details (protected).
 - `DELETE /event/:id`
   - Delete an event (protected).
+
+**Event object (`Event`)**
+
+```json
+{
+  "_id": "string",
+  "title": "string",
+  "date": "ISO date string",
+  "location": "string | null",
+  "description": "string | null",
+  "featured": "boolean",
+  "imageUrl": "string URL or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Event request bodies**
+
+- `POST /event` body:
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "location": "string (optional)",
+    "description": "string (optional)",
+    "featured": false,
+    "imageUrl": "string URL (optional)"
+  }
+  ```
+
+- `PATCH /event/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "location": "string",
+    "description": "string",
+    "featured": true,
+    "imageUrl": "string URL"
+  }
+  ```
+
+**Event success responses**
+
+- `GET /event`:
+
+  ```json
+  {
+    "message": "Events fetched",
+    "success": true,
+    "count": 10,
+    "data": [Event]
+  }
+  ```
+
+  Optional query: `?search=string` for full-text search.
+
+- `GET /event/:id`:
+
+  ```json
+  {
+    "message": "Event fetched",
+    "success": true,
+    "data": Event
+  }
+  ```
+
+- `POST /event`:
+
+  ```json
+  {
+    "message": "Event created",
+    "success": true,
+    "data": Event
+  }
+  ```
+
+- `PATCH /event/:id`:
+
+  ```json
+  {
+    "message": "Event updated",
+    "success": true,
+    "data": Event
+  }
+  ```
+
+- `DELETE /event/:id`:
+
+  ```json
+  {
+    "message": "Event deleted",
+    "success": true
+  }
+  ```
 
 ---
 
@@ -95,6 +538,99 @@ Base: `/announcement`
 - `DELETE /announcement/:id`
   - Delete an announcement (protected).
 
+**Announcement object (`Announcement`)**
+
+```json
+{
+  "_id": "string",
+  "title": "string",
+  "date": "ISO date string",
+  "summary": "string | null",
+  "body": "string | null",
+  "imageUrl": "string URL or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Announcement request bodies**
+
+- `POST /announcement` body:
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "summary": "string (optional)",
+    "body": "string (optional)",
+    "imageUrl": "string URL (optional)"
+  }
+  ```
+
+- `PATCH /announcement/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "title": "string",
+    "date": "YYYY-MM-DD",
+    "summary": "string",
+    "body": "string",
+    "imageUrl": "string URL"
+  }
+  ```
+
+**Announcement success responses**
+
+- `GET /announcement`:
+
+  ```json
+  {
+    "message": "Announcements fetched",
+    "success": true,
+    "count": 10,
+    "data": [Announcement]
+  }
+  ```
+
+- `GET /announcement/:id`:
+
+  ```json
+  {
+    "message": "Announcement fetched",
+    "success": true,
+    "data": Announcement
+  }
+  ```
+
+- `POST /announcement`:
+
+  ```json
+  {
+    "message": "Announcement created",
+    "success": true,
+    "data": Announcement
+  }
+  ```
+
+- `PATCH /announcement/:id`:
+
+  ```json
+  {
+    "message": "Announcement updated",
+    "success": true,
+    "data": Announcement
+  }
+  ```
+
+- `DELETE /announcement/:id`:
+
+  ```json
+  {
+    "message": "Announcement deleted",
+    "success": true
+  }
+  ```
+
 ---
 
 ## Prayer Requests
@@ -109,6 +645,92 @@ Base: `/prayer-request`
   - View a single prayer request.
 - `PATCH /prayer-request/:id`
   - Update prayer request status or details (e.g., mark as “read”, “resolved”; protected).
+
+**Prayer request object (`PrayerRequest`)**
+
+```json
+{
+  "_id": "string",
+  "fullName": "string | null",
+  "email": "string | null",
+  "message": "string",
+  "anonymous": "boolean",
+  "status": "new | read | resolved",
+  "resolvedAt": "ISO datetime or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Prayer request bodies**
+
+- `POST /prayer-request` body:
+
+  ```json
+  {
+    "fullName": "string",
+    "email": "string",
+    "message": "string",
+    "anonymous": false
+  }
+  ```
+
+  (In practice, `fullName`, `email`, and `message` must all be provided.)
+
+- `PATCH /prayer-request/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "fullName": "string",
+    "email": "string",
+    "message": "string",
+    "anonymous": true,
+    "status": "new | read | resolved"
+  }
+  ```
+
+**Prayer request success responses**
+
+- `GET /prayer-request`:
+
+  ```json
+  {
+    "message": "Prayer requests fetched successfully",
+    "success": true,
+    "count": 10,
+    "data": [PrayerRequest]
+  }
+  ```
+
+- `GET /prayer-request/:id`:
+
+  ```json
+  {
+    "message": "Prayer Request fetched successfully",
+    "success": true,
+    "data": PrayerRequest
+  }
+  ```
+
+- `POST /prayer-request`:
+
+  ```json
+  {
+    "message": "Prayer Request created successfully",
+    "success": true,
+    "data": PrayerRequest
+  }
+  ```
+
+- `PATCH /prayer-request/:id`:
+
+  ```json
+  {
+    "message": "Prayer Request updated successfully",
+    "success": true,
+    "data": PrayerRequest
+  }
+  ```
 
 ---
 
@@ -128,6 +750,100 @@ Base: `/testimony`
 - `DELETE /testimony/:id`
   - Delete a testimony (protected).
 
+**Testimony object (`Testimony`)**
+
+```json
+{
+  "_id": "string",
+  "fullName": "string | null",
+  "email": "string | null",
+  "message": "string",
+  "anonymous": "boolean",
+  "status": "new | read | resolved",
+  "featured": "boolean",
+  "approved": "boolean",
+  "approvedAt": "ISO datetime or null",
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Testimony request bodies**
+
+- `POST /testimony` body:
+
+  ```json
+  {
+    "fullName": "string",
+    "email": "string",
+    "message": "string",
+    "anonymous": false
+  }
+  ```
+
+- `PATCH /testimony/:id` body (all fields optional, any subset):
+
+  ```json
+  {
+    "status": "new | read | resolved",
+    "featured": true,
+    "approved": true,
+    "approvedAt": "YYYY-MM-DD"
+  }
+  ```
+
+**Testimony success responses**
+
+- `GET /testimony`:
+
+  ```json
+  {
+    "message": "Testimonies fetched successfully",
+    "success": true,
+    "count": 10,
+    "data": [Testimony]
+  }
+  ```
+
+- `GET /testimony/:id`:
+
+  ```json
+  {
+    "message": "Testimony fetched successfully",
+    "success": true,
+    "data": Testimony
+  }
+  ```
+
+- `POST /testimony`:
+
+  ```json
+  {
+    "message": "Testimony created successfully",
+    "success": true,
+    "data": Testimony
+  }
+  ```
+
+- `PATCH /testimony/:id`:
+
+  ```json
+  {
+    "message": "Testimony updated successfully",
+    "success": true,
+    "data": Testimony
+  }
+  ```
+
+- `DELETE /testimony/:id`:
+
+  ```json
+  {
+    "message": "Testimony deleted successfully",
+    "success": true
+  }
+  ```
+
 ---
 
 ## Image Uploads
@@ -139,6 +855,30 @@ Base: `/upload`
   - Stores the image in Cloudinary and returns an `imageUrl` (plus metadata) to use in other JSON APIs.
   - Typical flow: first call this endpoint to get an `imageUrl`, then send that URL in bodies for members, events, announcements, or HoT profile updates.
   - For implementation and environment details, see `server/UPLOADS.md`.
+
+**Upload request**
+
+- `POST /upload/image` body:
+
+  - `Content-Type: multipart/form-data`
+  - Field:
+    - `image`: binary file (JPEG, PNG, WEBP; max ~5MB)
+
+**Upload success response**
+
+```json
+{
+  "success": true,
+  "message": "Image uploaded successfully",
+  "data": {
+    "imageUrl": "https://res.cloudinary.com/.../image/upload/v123/....jpg",
+    "publicId": "dyh/abc123",
+    "width": 1024,
+    "height": 768,
+    "format": "jpg"
+  }
+}
+```
 
 ---
 
@@ -153,6 +893,32 @@ Base: `/activity` (protected)
     - `"New sermon added: Walking by Faith"`,
     - `"Prayer request from Anonymous was updated"`.
   - Use this for an admin “Recent Activity” feed or notifications screen.
+
+**Activity object (`ActivityLog`)**
+
+```json
+{
+  "_id": "string",
+  "action": "string (e.g. MEMBER, EVENT, HOT)",
+  "type": "NEW | UPDATED | DELETED",
+  "message": "string",
+  "meta": {},                    // activity-specific payload (e.g. Member, Event)
+  "createdAt": "ISO datetime",
+  "updatedAt": "ISO datetime"
+}
+```
+
+**Activity success response**
+
+- `GET /activity`:
+
+  ```json
+  {
+    "message": "Activities fetched successfully",
+    "success": true,
+    "data": [ActivityLog]
+  }
+  ```
 
 ---
 

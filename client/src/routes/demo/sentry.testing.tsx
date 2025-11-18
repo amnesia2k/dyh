@@ -10,7 +10,7 @@ import * as fs from 'node:fs/promises'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import * as Sentry from '@sentry/tanstackstart-react'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/demo/sentry/testing')({
   component: RouteComponent,
@@ -65,7 +65,7 @@ function RouteComponent() {
   const [showTrace, setShowTrace] = useState<Record<string, boolean>>({})
   const [spanOps, setSpanOps] = useState<Record<string, string>>({})
   const [demoStep, setDemoStep] = useState(0)
-  const [replayEvents, setReplayEvents] = useState<string[]>([])
+  const [replayEvents, setReplayEvents] = useState<Array<string>>([])
   const [copiedSpan, setCopiedSpan] = useState<string | null>(null)
   const startTimeRef = useRef<string>('')
 
@@ -105,7 +105,7 @@ function RouteComponent() {
           op: 'demo.client-error-flow',
         },
         async () => {
-          Sentry.setContext('demo', {
+          await Sentry.setContext('demo', {
             feature: 'client-error-demo',
             triggered_at: new Date().toISOString(),
           })
@@ -286,7 +286,7 @@ function RouteComponent() {
                         backgroundSize: '250% 100%',
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-linear-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="relative">
                         <div className="flex items-center mb-2">
                           <span className="font-medium">
@@ -357,7 +357,7 @@ function RouteComponent() {
                         backgroundSize: '250% 100%',
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-linear-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="relative">
                         <div className="flex items-center mb-2">
                           <span className="font-medium">
@@ -436,7 +436,7 @@ function RouteComponent() {
                         backgroundSize: '250% 100%',
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-linear-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="relative">
                         <div className="flex items-center mb-2">
                           <span className="font-medium">
@@ -507,7 +507,7 @@ function RouteComponent() {
                         backgroundSize: '250% 100%',
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-linear-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="relative">
                         <div className="flex items-center mb-2">
                           <span className="font-medium">Test server Trace</span>

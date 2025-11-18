@@ -14,8 +14,8 @@ Unless noted otherwise, JSON responses from the API follow this structure:
 {
   "message": "Human-readable status",
   "success": true,
-  "data": {},        // object or array, or omitted
-  "count": 0         // only for list endpoints
+  "data": {}, // object or array, or omitted
+  "count": 0 // only for list endpoints
 }
 ```
 
@@ -859,7 +859,6 @@ Base: `/upload`
 **Upload request**
 
 - `POST /upload/image` body:
-
   - `Content-Type: multipart/form-data`
   - Field:
     - `image`: binary file (JPEG, PNG, WEBP; max ~5MB)
@@ -902,7 +901,7 @@ Base: `/activity` (protected)
   "action": "string (e.g. MEMBER, EVENT, HOT)",
   "type": "NEW | UPDATED | DELETED",
   "message": "string",
-  "meta": {},                    // activity-specific payload (e.g. Member, Event)
+  "meta": {}, // activity-specific payload (e.g. Member, Event)
   "createdAt": "ISO datetime",
   "updatedAt": "ISO datetime"
 }

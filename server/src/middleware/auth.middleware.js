@@ -1,15 +1,13 @@
 import { verifyToken } from "../utils/generate-token.js";
 import Hot from "../db/models/hot.model.js";
 import { logger } from "../utils/logger.js";
+import { response } from "../utils/response.js";
 
 export async function protectRoute(req, res, next) {
   try {
     const token = req.cookies?.token || req.headers?.authorization?.split?.("Bearer ")?.[1];
     if (!token) {
-      return res.status(401).json({
-        message: "Unauthorized: You must be logged in to access this route",
-        success: false,
-      });
+      return response(res, 401, "Unauthorized: You must be logged in to access this route");
     }
 
     let decoded;
@@ -18,7 +16,7 @@ export async function protectRoute(req, res, next) {
       logger.info("protectRoute: decoded token:", decoded);
     } catch (err) {
       logger.error("protectRoute: token verification failed", err);
-      return res.status(401).json({ message: "Invalid or expired token", success: false });
+      return response(res, 401, "Invalid or expired token");
     }
 
     // Load the HOT by decoded._id
@@ -26,30 +24,24 @@ export async function protectRoute(req, res, next) {
     logger.info("protectRoute: hot lookup result:", user);
 
     if (!user) {
-      return res.status(401).json({ message: "User not found", success: false });
+      return response(res, 401, "User not found");
     }
 
     req.user = user;
     next();
   } catch (err) {
     logger.error("❌ protectRoute error:", err);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return response(res, 500, "Internal server error");
   }
 }
 
 export function adminGuard(req, res, next) {
   if (!req.user) {
-    return res.status(401).json({
-      message: "Unauthorized: No user context found",
-      success: false,
-    });
+    return response(res, 401, "Unauthorized: No user context found");
   }
 
   if (req.user.role !== "admin") {
-    return res.status(403).json({
-      message: "Forbidden: Admins only",
-      success: false,
-    });
+    return response(res, 403, "Forbidden: Admins only");
   }
 
   next();

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@netlify/vite-plugin-tanstack-start": "^1.0.2",
+    "@radix-ui/react-slot": "^1.2.4",
     "@sentry/tanstackstart-react": "^10.22.0",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",

@@ -15,7 +15,7 @@ This project is already set up to run entirely in Docker using a single `docker-
 On any machine where you want to run this stack (your laptop or a VPS), you need:
 
 - Docker Engine (Docker Desktop on macOS/Windows, or `docker-ce` on Linux)
-- Docker Compose plugin (`docker compose` command)  
+- Docker Compose plugin (`docker compose` command)
   - On newer Docker installs this is included by default; if not, install the Compose plugin.
 
 You do **not** need Node, Bun, Mongo, or Redis installed on the host – everything runs in containers.
@@ -360,12 +360,12 @@ Because reverse proxy choice is personal and environment‑specific, this repo d
 
 ```yaml
 proxy:
-  image: caddy:latest  # or nginx/traefik
+  image: caddy:latest # or nginx/traefik
   ports:
     - "80:80"
     - "443:443"
   volumes:
-    - ./Caddyfile:/etc/caddy/Caddyfile  # example
+    - ./Caddyfile:/etc/caddy/Caddyfile # example
   depends_on:
     - web
     - api
@@ -447,4 +447,3 @@ From the project root:
   ```
 
 With this in place, you can treat Docker as the standard way to run the entire stack locally and on any server that supports Docker, keeping the environment consistent across machines.
-

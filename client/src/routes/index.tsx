@@ -7,7 +7,9 @@ import {
   Waves,
   Zap,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import Header from '@/components/Header'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -55,7 +57,7 @@ function App() {
 
   return (
     <div>
-      {/* <Header /> */}
+      <Header />
 
       <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900">
         <section className="relative py-20 px-6 text-center overflow-hidden">
@@ -91,6 +93,10 @@ function App() {
               >
                 Documentation
               </a>
+
+              <Button onClick={() => toast.success('Hello World')}>
+                Click Me
+              </Button>
               <p className="text-gray-400 text-sm mt-2">
                 Begin your TanStack Start journey by editing{' '}
                 <code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">

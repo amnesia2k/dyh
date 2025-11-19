@@ -1,0 +1,79 @@
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import type { Hot } from '@/hooks/dal/hot'
+import { fetchCurrentHot, hotKeys } from '@/hooks/dal/hot'
+import { AppSidebar } from '@/components/app-sidebar'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+
+export const Route = createFileRoute('/hot/dashboard')({
+  beforeLoad: async ({ context }) => {
+    const queryClient = context.queryClient
+
+    const user = await queryClient.ensureQueryData<Hot | null>({
+      queryKey: hotKeys.current(),
+      queryFn: fetchCurrentHot,
+    })
+
+    if (!user) {
+      throw redirect({
+        to: '/hot/login',
+        search: { redirect: '/hot/dashboard', reason: 'unauthorized' },
+      })
+    }
+
+    if (user.role !== 'hot') {
+      throw redirect({ to: '/' })
+    }
+
+    return { currentHot: user }
+  },
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2">
+          <div className="flex items-center gap-2 px-5">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Building Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+
+        <div className="flex flex-1 flex-col gap-4 p-5 pt-0">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}

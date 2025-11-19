@@ -1,14 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import {
-  ApiError,
-  clearAccessToken,
-  del,
-  get,
-  patch,
-  post,
-  setAccessToken,
-} from '../api'
+import { ApiError, del, get, patch, post, setAccessToken } from '../api'
 import { useAuthStore } from '../auth-store'
 
 export type HotRole = 'admin' | 'hot'

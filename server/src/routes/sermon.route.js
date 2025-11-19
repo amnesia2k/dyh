@@ -65,6 +65,7 @@ router.get("/:id", getSermonById);
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -104,6 +105,7 @@ router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), cr
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -135,6 +137,7 @@ router.patch("/:id", protectRoute, validateRequest({ body: updateSermonSchema })
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

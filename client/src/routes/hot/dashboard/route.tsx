@@ -1,6 +1,5 @@
+import { useEffect } from 'react'
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import type { Hot } from '@/hooks/dal/hot'
-import { fetchCurrentHot, hotKeys } from '@/hooks/dal/hot'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   SidebarInset,
@@ -16,33 +15,53 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { useAuthStore } from '@/hooks/auth-store'
+import { useCurrentHotQuery } from '@/hooks/dal/hot'
 
 export const Route = createFileRoute('/hot/dashboard')({
-  beforeLoad: async ({ context }) => {
-    const queryClient = context.queryClient
+  // loader: () => {
+  //   if (typeof window === 'undefined') {
+  //     // On the server, do nothing and let the client rerun the loader.
+  //     return {}
+  //   }
 
-    const user = await queryClient.ensureQueryData<Hot | null>({
-      queryKey: hotKeys.current(),
-      queryFn: fetchCurrentHot,
-    })
+  //   const { isAuthenticated } = useAuthStore.getState()
 
-    if (!user) {
+  //   if (!isAuthenticated) {
+  //     throw redirect({
+  //       to: '/hot/login',
+  //     })
+  //   }
+
+  //   return {}
+  // },
+
+  beforeLoad: () => {
+    const token =
+      typeof window !== 'undefined'
+        ? window.localStorage.getItem('dyh_access_token')
+        : null
+
+    if (!token) {
       throw redirect({
         to: '/hot/login',
-        search: { redirect: '/hot/dashboard', reason: 'unauthorized' },
       })
     }
-
-    if (user.role !== 'hot') {
-      throw redirect({ to: '/' })
-    }
-
-    return { currentHot: user }
   },
+
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const setHot = useAuthStore((state) => state.setHot)
+  const { data: currentHot } = useCurrentHotQuery()
+
+  useEffect(() => {
+    if (currentHot) {
+      setHot(currentHot)
+    }
+  }, [currentHot, setHot])
+
   return (
     <SidebarProvider>
       <AppSidebar />

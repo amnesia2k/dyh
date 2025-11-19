@@ -87,6 +87,7 @@ router.get("/:id", getSinglePR);
  *       - Prayer Requests
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -95,6 +95,7 @@ router.post("/", validateRequest({ body: createTestimonySchema }), createTestimo
  *       - Testimonies
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -131,6 +132,7 @@ router.patch(
  *       - Testimonies
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

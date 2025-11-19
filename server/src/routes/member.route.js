@@ -22,6 +22,7 @@ const router = Router();
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Members fetched successfully.
@@ -38,6 +39,7 @@ router.get("/", protectRoute, getAllMembers);
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -108,6 +110,7 @@ router.post("/", validateRequest({ body: createMemberSchema }), createMember);
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,6 +142,7 @@ router.patch("/:id", validateRequest({ body: updateMemberSchema }), updateMember
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

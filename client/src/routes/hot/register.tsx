@@ -1,24 +1,23 @@
-import { useEffect } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { GalleryVerticalEnd } from 'lucide-react'
 
 import { RegisterForm } from '@/components/register-form'
-import { useCurrentHotQuery } from '@/hooks/dal/hot'
+import { getAccessToken } from '@/hooks/api'
 
 export const Route = createFileRoute('/hot/register')({
+  beforeLoad: () => {
+    const token = getAccessToken()
+
+    if (token) {
+      throw redirect({
+        to: '/hot/dashboard',
+      })
+    }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data: currentHot } = useCurrentHotQuery()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (currentHot && currentHot.role === 'hot') {
-      navigate({ to: '/hot/dashboard' })
-    }
-  }, [currentHot, navigate])
-
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm sm:max-w-md lg:max-w-2xl flex-col gap-6">

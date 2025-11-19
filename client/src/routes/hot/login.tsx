@@ -1,31 +1,16 @@
 import { useEffect } from 'react'
-import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { GalleryVerticalEnd } from 'lucide-react'
-import { toast } from 'sonner'
 import { LoginForm } from '@/components/login-form'
 import { useCurrentHotQuery } from '@/hooks/dal/hot'
 
 export const Route = createFileRoute('/hot/login')({
-  validateSearch: (search: Record<string, unknown>) => {
-    const redirect =
-      typeof search.redirect === 'string' ? search.redirect : undefined
-    const reason = typeof search.reason === 'string' ? search.reason : undefined
-
-    return { redirect, reason }
-  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const search = useSearch({ from: '/hot/login' })
-  const { data: currentHot } = useCurrentHotQuery()
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (search.reason === 'unauthorized') {
-      toast.info('Login as HOT to access Dashboard')
-    }
-  }, [search])
+  const { data: currentHot } = useCurrentHotQuery()
 
   useEffect(() => {
     if (currentHot && currentHot.role === 'hot') {

@@ -9,6 +9,7 @@ import {
   post,
   setAccessToken,
 } from '../api'
+import { useAuthStore } from '../auth-store'
 
 export type HotRole = 'admin' | 'hot'
 
@@ -142,6 +143,7 @@ export function deleteHot(id: string) {
 
 export function useRegisterHotMutation() {
   const queryClient = useQueryClient()
+  const setHot = useAuthStore((state) => state.setHot)
 
   return useMutation({
     mutationFn: registerHot,
@@ -150,6 +152,7 @@ export function useRegisterHotMutation() {
         setAccessToken(data.token)
       }
 
+      setHot(data)
       queryClient.setQueryData<Hot | null>(hotKeys.current(), data)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },
@@ -158,6 +161,7 @@ export function useRegisterHotMutation() {
 
 export function useLoginHotMutation() {
   const queryClient = useQueryClient()
+  const setHot = useAuthStore((state) => state.setHot)
 
   return useMutation({
     mutationFn: loginHot,
@@ -166,6 +170,7 @@ export function useLoginHotMutation() {
         setAccessToken(data.token)
       }
 
+      setHot(data)
       queryClient.setQueryData<Hot | null>(hotKeys.current(), data)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },
@@ -174,11 +179,12 @@ export function useLoginHotMutation() {
 
 export function useLogoutHotMutation() {
   const queryClient = useQueryClient()
+  const logout = useAuthStore((state) => state.logout)
 
   return useMutation({
     mutationFn: logoutHot,
     onSuccess: () => {
-      clearAccessToken()
+      logout()
       queryClient.setQueryData<Hot | null>(hotKeys.current(), null)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },

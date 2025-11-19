@@ -14,6 +14,7 @@ const router = Router();
  *       - Activity
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Activities fetched successfully.

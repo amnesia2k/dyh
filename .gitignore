@@ -1,3 +1,5 @@
 .idea
 node_modules
 bun.lock
+# Local Netlify folder
+.netlify

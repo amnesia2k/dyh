@@ -136,13 +136,22 @@ export const deleteHot = async (req, res) => {
 export const loginHot = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return response(res, 400, "Email and password are required.");
+    if (!email || !password) {
+      res.clearCookie("token", COOKIE_OPTIONS);
+      return response(res, 400, "Email and password are required.");
+    }
 
     const hot = await Hot.findOne({ email }).select("+passwordHash");
-    if (!hot) return response(res, 401, "Invalid email or password.");
+    if (!hot) {
+      res.clearCookie("token", COOKIE_OPTIONS);
+      return response(res, 401, "Invalid email or password.");
+    }
 
     const isMatch = await hot.comparePassword(password);
-    if (!isMatch) return response(res, 401, "Invalid email or password.");
+    if (!isMatch) {
+      res.clearCookie("token", COOKIE_OPTIONS);
+      return response(res, 401, "Invalid email or password.");
+    }
 
     hot.lastLogin = new Date();
     await hot.save();

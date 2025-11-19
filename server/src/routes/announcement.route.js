@@ -65,6 +65,7 @@ router.get("/:id", getAnnouncementById);
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -108,6 +109,7 @@ router.post(
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -144,6 +146,7 @@ router.patch(
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

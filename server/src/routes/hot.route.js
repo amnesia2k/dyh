@@ -20,11 +20,12 @@ const router = Router();
  * /hot/me:
  *   get:
  *     summary: Get current HOT profile
- *     description: Returns the currently authenticated HOT user (based on cookie token).
+ *     description: Returns the currently authenticated HOT user (based on cookie or Bearer token).
  *     tags:
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Current HOT fetched successfully.
@@ -149,11 +150,12 @@ router.post("/login", validateRequest({ body: loginSchema }), loginHot);
  * /hot/logout:
  *   post:
  *     summary: Logout current HOT
- *     description: Clears the authentication cookie for the current HOT.
+ *     description: Clears the authentication cookie for the current HOT (if using cookie auth).
  *     tags:
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logout successful.
@@ -170,6 +172,7 @@ router.post("/logout", protectRoute, logoutHot);
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

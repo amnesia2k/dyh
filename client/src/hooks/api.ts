@@ -57,7 +57,8 @@ export class ApiError<TData = unknown> extends Error {
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
+  // We rely solely on Bearer tokens, not cookies.
+  withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -69,7 +70,6 @@ const api: AxiosInstance = axios.create({
 })
 
 const ACCESS_TOKEN_STORAGE_KEY = 'dyh_access_token'
-const ACCESS_TOKEN_COOKIE_NAME = 'token'
 
 let accessToken: string | null = null
 
@@ -103,20 +103,6 @@ export const getAccessToken = () => {
       }
     } catch {
       // Ignore storage errors
-    }
-
-    if (typeof document !== 'undefined') {
-      const cookie = document.cookie
-        .split('; ')
-        .find((part) => part.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`))
-
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split('=')[1] ?? '')
-        if (value) {
-          accessToken = value
-          return value
-        }
-      }
     }
   }
 

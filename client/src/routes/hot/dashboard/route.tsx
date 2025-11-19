@@ -1,6 +1,4 @@
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import type { Hot } from '@/hooks/dal/hot'
-import { fetchCurrentHot, hotKeys } from '@/hooks/dal/hot'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   SidebarInset,
@@ -18,27 +16,6 @@ import {
 } from '@/components/ui/breadcrumb'
 
 export const Route = createFileRoute('/hot/dashboard')({
-  beforeLoad: async ({ context }) => {
-    const queryClient = context.queryClient
-
-    const user = await queryClient.ensureQueryData<Hot | null>({
-      queryKey: hotKeys.current(),
-      queryFn: fetchCurrentHot,
-    })
-
-    if (!user) {
-      throw redirect({
-        to: '/hot/login',
-        search: { redirect: '/hot/dashboard', reason: 'unauthorized' },
-      })
-    }
-
-    if (user.role !== 'hot') {
-      throw redirect({ to: '/' })
-    }
-
-    return { currentHot: user }
-  },
   component: RouteComponent,
 })
 

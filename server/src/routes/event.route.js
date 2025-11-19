@@ -65,6 +65,7 @@ router.get("/:id", getEventById);
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -105,6 +106,7 @@ router.post("/", protectRoute, validateRequest({ body: createEventSchema }), cre
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -136,6 +138,7 @@ router.patch("/:id", protectRoute, validateRequest({ body: updateEventSchema }),
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

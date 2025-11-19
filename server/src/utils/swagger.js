@@ -26,6 +26,12 @@ const swaggerDefinition = {
         in: "cookie",
         name: "token",
       },
+      // Bearer token auth (JWT in Authorization header)
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
     },
     schemas: {
       // Update payloads are generally "partial" versions of the create payloads.

@@ -1,12 +1,12 @@
-import { getRouteApi } from '@tanstack/react-router'
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Sparkles,
 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -24,16 +24,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-
-const dashboardRouteApi = getRouteApi('/hot/dashboard')
+import { useAuthStore } from '@/hooks/auth-store'
+import { useLogoutHotMutation } from '@/hooks/dal/hot'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { currentHot } = dashboardRouteApi.useRouteContext()
+  const navigate = useNavigate()
+  const hot = useAuthStore((state) => state.hot)
+  const { mutateAsync: logout, isPending } = useLogoutHotMutation()
 
-  const name = currentHot.name
-  const email = currentHot.email
-  const avatar = currentHot.imageUrl
+  if (!hot) {
+    return null
+  }
+
+  const name = hot.name ?? hot.email
+  const email = hot.email
+  const avatar = hot.imageUrl
 
   return (
     <SidebarMenu>
@@ -45,8 +51,13 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={avatar} alt={name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                {avatar ? (
+                  <AvatarImage src={avatar} alt={name} />
+                ) : (
+                  <AvatarFallback className="rounded-lg">
+                    {name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
@@ -64,8 +75,13 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={avatar} alt={name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  {avatar ? (
+                    <AvatarImage src={avatar} alt={name} />
+                  ) : (
+                    <AvatarFallback className="rounded-lg">
+                      {name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{name}</span>
@@ -87,16 +103,30 @@ export function NavUser() {
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
                 <Bell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isPending}
+              onClick={async () => {
+                const promise = logout()
+
+                toast.promise(promise, {
+                  loading: 'Logging out...',
+                  success: 'Logged out',
+                  error: 'Failed to log out. Please try again.',
+                })
+
+                try {
+                  await promise
+                  navigate({ to: '/hot/login' })
+                } catch {
+                  // toast already handled
+                }
+              }}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

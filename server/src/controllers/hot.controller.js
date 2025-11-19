@@ -5,14 +5,6 @@ import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
 import { response } from "../utils/response.js";
 
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-};
-
 export const getHots = async (_req, res) => {
   try {
     const hots = await Hot.find().select("-passwordHash");
@@ -59,7 +51,6 @@ export const registerHot = async (req, res) => {
       phone,
     });
     const token = generateToken(newHot._id);
-    res.cookie("token", token, COOKIE_OPTIONS);
     const safeUser = newHot.toObject();
     delete safeUser.passwordHash;
     safeUser.token = token;
@@ -137,19 +128,16 @@ export const loginHot = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.clearCookie("token", COOKIE_OPTIONS);
       return response(res, 400, "Email and password are required.");
     }
 
     const hot = await Hot.findOne({ email }).select("+passwordHash");
     if (!hot) {
-      res.clearCookie("token", COOKIE_OPTIONS);
       return response(res, 401, "Invalid email or password.");
     }
 
     const isMatch = await hot.comparePassword(password);
     if (!isMatch) {
-      res.clearCookie("token", COOKIE_OPTIONS);
       return response(res, 401, "Invalid email or password.");
     }
 
@@ -157,7 +145,6 @@ export const loginHot = async (req, res) => {
     await hot.save();
 
     const token = generateToken(hot._id);
-    res.cookie("token", token, COOKIE_OPTIONS);
     const safeUser = hot.toObject();
     delete safeUser.passwordHash;
     safeUser.token = token;

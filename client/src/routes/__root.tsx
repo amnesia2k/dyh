@@ -50,7 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="font-sans">
         {children}
         <Toaster position="bottom-right" closeButton />
         <TanStackDevtools

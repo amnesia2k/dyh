@@ -1,8 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { ApiError, del, get, patch, post } from '../api'
+import {
+  ApiError,
+  clearAccessToken,
+  del,
+  get,
+  patch,
+  post,
+  setAccessToken,
+} from '../api'
 
 export type HotRole = 'admin' | 'hot'
+
+export interface HotTribe {
+  name: string
+  value: string
+}
+
+export const HOT_TRIBES: Array<HotTribe> = [
+  { name: 'Agape Tribe', value: 'agape-tribe' },
+  { name: 'Area 116', value: 'area-116' },
+  { name: 'Blaze Tribe', value: 'blaze-tribe' },
+  { name: 'Fountain Tribe', value: 'fountain-tribe' },
+  { name: 'Impact Tribe', value: 'impact-tribe' },
+  { name: 'Lighthouse Tribe', value: 'lighthouse-tribe' },
+  { name: 'Love Marshall', value: 'love-marshall' },
+  { name: 'Oasis Tribe', value: 'oasis-tribe' },
+  { name: 'Ronel Tribe', value: 'ronel-tribe' },
+]
 
 export interface Hot {
   _id: string
@@ -121,6 +146,10 @@ export function useRegisterHotMutation() {
   return useMutation({
     mutationFn: registerHot,
     onSuccess: (data) => {
+      if (data.token) {
+        setAccessToken(data.token)
+      }
+
       queryClient.setQueryData<Hot | null>(hotKeys.current(), data)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },
@@ -133,6 +162,10 @@ export function useLoginHotMutation() {
   return useMutation({
     mutationFn: loginHot,
     onSuccess: (data) => {
+      if (data.token) {
+        setAccessToken(data.token)
+      }
+
       queryClient.setQueryData<Hot | null>(hotKeys.current(), data)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },
@@ -145,6 +178,7 @@ export function useLogoutHotMutation() {
   return useMutation({
     mutationFn: logoutHot,
     onSuccess: () => {
+      clearAccessToken()
       queryClient.setQueryData<Hot | null>(hotKeys.current(), null)
       queryClient.invalidateQueries({ queryKey: hotKeys.list() })
     },

@@ -68,23 +68,80 @@ const api: AxiosInstance = axios.create({
   validateStatus: () => true,
 })
 
+const ACCESS_TOKEN_STORAGE_KEY = 'dyh_access_token'
+const ACCESS_TOKEN_COOKIE_NAME = 'token'
+
 let accessToken: string | null = null
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token
+
+  if (typeof window !== 'undefined') {
+    try {
+      if (token) {
+        window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token)
+      } else {
+        window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY)
+      }
+    } catch {
+      // Ignore storage errors (e.g. in private mode)
+    }
+  }
 }
 
-export const getAccessToken = () => accessToken
+export const getAccessToken = () => {
+  if (accessToken) {
+    return accessToken
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY)
+      if (stored) {
+        accessToken = stored
+        return stored
+      }
+    } catch {
+      // Ignore storage errors
+    }
+
+    if (typeof document !== 'undefined') {
+      const cookie = document.cookie
+        .split('; ')
+        .find((part) => part.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`))
+
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split('=')[1] ?? '')
+        if (value) {
+          accessToken = value
+          return value
+        }
+      }
+    }
+  }
+
+  return null
+}
 
 export const clearAccessToken = () => {
   accessToken = null
+
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY)
+    } catch {
+      // Ignore storage errors
+    }
+  }
 }
 
 api.interceptors.request.use(
   (config) => {
-    if (accessToken) {
+    const token = getAccessToken()
+
+    if (token) {
       const headers = new AxiosHeaders(config.headers)
-      headers.set('Authorization', `Bearer ${accessToken}`)
+      headers.set('Authorization', `Bearer ${token}`)
       config.headers = headers
     }
 

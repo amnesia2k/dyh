@@ -15,9 +15,11 @@ const app = express();
 
 const PORT = env.PORT || 8000;
 
+const allowedOrigins = [env.FRONTEND_URL, env.DEV_FRONTEND_URL].filter(Boolean);
+
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

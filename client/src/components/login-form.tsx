@@ -42,29 +42,23 @@ export function LoginForm({
       return
     }
 
-    try {
-      const promise = mutateAsync({ email, password })
+    const promise = mutateAsync({ email, password })
 
-      toast.promise(promise, {
-        loading: 'Logging in...',
-        success: 'Logged in successfully',
-        error: (error) =>
-          error instanceof ApiError
-            ? error.message
-            : 'Failed to login. Please try again.',
-      })
-
-      await promise
-
-      // event.currentTarget.reset()
-      // navigate({ to: '/' })
-    } catch (error) {
-      const message =
+    toast.promise(promise, {
+      loading: 'Logging in...',
+      success: 'Logged in successfully',
+      error: (error) =>
         error instanceof ApiError
           ? error.message
-          : 'Failed to login. Please try again.'
+          : 'Failed to login. Please try again.',
+    })
 
-      toast.error(message)
+    try {
+      await promise
+      event.currentTarget.reset()
+      navigate({ to: '/hot/dashboard' })
+    } catch {
+      // Error toast already handled by toast.promise
     }
   }
 

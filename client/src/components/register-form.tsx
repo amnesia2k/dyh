@@ -78,39 +78,31 @@ export function RegisterForm({
       return
     }
 
-    try {
-      const promise = mutateAsync({
-        name,
-        email,
-        password,
-        tribe,
-        phone,
-        bio: bio || undefined,
-        imageUrl,
-      })
+    const promise = mutateAsync({
+      name,
+      email,
+      password,
+      tribe,
+      phone,
+      bio: bio || undefined,
+      imageUrl,
+    })
 
-      toast.promise(promise, {
-        loading: 'Creating account...',
-        success: 'Registration successful',
-        error: (error) =>
-          error instanceof ApiError
-            ? error.message
-            : 'Failed to register. Please try again.',
-      })
-
-      await promise
-
-      console.log('Res >>>', promise)
-
-      // formElement.reset()
-      // navigate({ to: '/' })
-    } catch (error) {
-      const message =
+    toast.promise(promise, {
+      loading: 'Creating account...',
+      success: 'Registration successful',
+      error: (error) =>
         error instanceof ApiError
           ? error.message
-          : 'Failed to register. Please try again.'
+          : 'Failed to register. Please try again.',
+    })
 
-      toast.error(message)
+    try {
+      await promise
+      formElement.reset()
+      navigate({ to: '/hot/dashboard' })
+    } catch {
+      // Error toast already handled by toast.promise
     }
   }
 
@@ -279,6 +271,7 @@ export function RegisterForm({
                   Already have an account?{' '}
                   <Link
                     to="/hot/login"
+                    search={{ redirect: undefined, reason: undefined }}
                     className="underline-offset-4 hover:underline"
                   >
                     Login

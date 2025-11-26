@@ -5,6 +5,7 @@ import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import netlify from '@netlify/vite-plugin-tanstack-start'
+import { nitro } from 'nitro/vite'
 
 const isDocker = process.env.IN_DOCKER === '1'
 const isCI = process.env.CI === 'true' // IMPORTANT FIX
@@ -21,6 +22,7 @@ export default defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
+    nitro(),
     viteReact({
       babel: {
         plugins: ['babel-plugin-react-compiler'],

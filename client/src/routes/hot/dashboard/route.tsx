@@ -4,8 +4,9 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Fragment } from 'react/jsx-runtime'
+import { toast } from 'sonner'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   Breadcrumb,
@@ -38,6 +39,13 @@ function RouteComponent() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const hasShownAuthToast = useRef(false)
+
+  const showAuthToast = useCallback(() => {
+    if (hasShownAuthToast.current) return
+    hasShownAuthToast.current = true
+    toast.error('You need to be logged in to access dashboard')
+  }, [])
 
   const { data } = useMeQuery({
     enabled: hydrated && Boolean(token),
@@ -48,6 +56,7 @@ function RouteComponent() {
     refetchOnWindowFocus: false,
     onError: () => {
       clearAuth()
+      showAuthToast()
       navigate({
         to: '/hot/login',
         search: { redirect: '/hot/dashboard' },
@@ -60,13 +69,14 @@ function RouteComponent() {
     if (!hydrated) return
 
     if (!isAuthenticated) {
+      showAuthToast()
       navigate({
         to: '/hot/login',
         search: { redirect: '/hot/dashboard' },
         replace: true,
       })
     }
-  }, [hydrated, isAuthenticated, navigate])
+  }, [hydrated, isAuthenticated, navigate, showAuthToast])
 
   useEffect(() => {
     if (data && token) {

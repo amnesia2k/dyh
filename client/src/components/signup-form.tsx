@@ -223,11 +223,7 @@ export function SignupForm({
 
           <Field className="lg:col-span-2">
             <Button type="submit" disabled={isSubmitting || isUploading}>
-              {isUploading
-                ? 'Uploading image...'
-                : isSubmitting
-                  ? 'Creating account...'
-                  : 'Create Account'}
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
             </Button>
           </Field>
         </div>

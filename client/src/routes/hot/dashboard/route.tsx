@@ -1,5 +1,10 @@
-import { useEffect } from 'react'
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { Fragment, useEffect } from 'react'
+import {
+  Outlet,
+  createFileRoute,
+  redirect,
+  useRouterState,
+} from '@tanstack/react-router'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   SidebarInset,
@@ -55,6 +60,32 @@ export const Route = createFileRoute('/hot/dashboard')({
 function RouteComponent() {
   const setHot = useAuthStore((state) => state.setHot)
   const { data: currentHot } = useCurrentHotQuery()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
+  const segments = pathname.split('/').filter(Boolean)
+  const dashboardIndex = segments.findIndex(
+    (segment) => segment === 'dashboard',
+  )
+  const afterDashboard =
+    dashboardIndex >= 0 ? segments.slice(dashboardIndex + 1) : []
+
+  const breadcrumbs = [
+    { label: 'Dashboard', href: '/hot/dashboard' },
+    ...afterDashboard.map((segment, index) => {
+      const label = segment
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ')
+
+      const href = `/hot/dashboard/${afterDashboard
+        .slice(0, index + 1)
+        .join('/')}`
+
+      return { label, href }
+    }),
+  ]
 
   useEffect(() => {
     if (currentHot) {
@@ -75,15 +106,33 @@ function RouteComponent() {
             />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
+                {breadcrumbs.map((crumb, index) => {
+                  const isLast = index === breadcrumbs.length - 1
+                  const isFirst = index === 0
+
+                  return (
+                    <Fragment key={crumb.href}>
+                      <BreadcrumbItem
+                        className={
+                          isFirst && !isLast ? 'hidden md:block' : undefined
+                        }
+                      >
+                        {isLast ? (
+                          <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={crumb.href}>
+                            {crumb.label}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {!isLast && (
+                        <BreadcrumbSeparator
+                          className={isFirst ? 'hidden md:block' : undefined}
+                        />
+                      )}
+                    </Fragment>
+                  )
+                })}
               </BreadcrumbList>
             </Breadcrumb>
           </div>

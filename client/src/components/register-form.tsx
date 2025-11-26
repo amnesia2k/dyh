@@ -248,7 +248,6 @@ export function RegisterForm({
 
                         const result = await promise
 
-                        console.log('Result >>>', result)
                         setUploadedImageUrl(result.imageUrl)
 
                         const hidden = formRef.current?.elements.namedItem(

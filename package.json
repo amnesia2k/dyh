@@ -31,6 +31,7 @@
   "type": "module",
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "dyh-web"
   ]
 }

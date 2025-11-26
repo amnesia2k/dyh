@@ -6,11 +6,12 @@
  * @ai_context: Demonstrates Sentry features through interactive examples with educational context
  */
 
-import * as fs from 'node:fs/promises'
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useEffect, useRef, useState } from 'react'
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 export const Route = createFileRoute('/demo/sentry/testing')({
   component: RouteComponent,
@@ -22,42 +23,15 @@ export const Route = createFileRoute('/demo/sentry/testing')({
   },
 })
 
-// Server function that will error
-const badServerFunc = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return await Sentry.startSpan(
-    {
-      name: 'Reading non-existent file',
-      op: 'file.read',
-    },
-    async () => {
-      try {
-        await fs.readFile('./doesnt-exist', 'utf-8')
-        return true
-      } catch (error) {
-        Sentry.captureException(error)
-        throw error
-      }
-    },
-  )
-})
+const simulateServerError = async () => {
+  await sleep(400)
+  throw new Error('Simulated server failure while backend is offline')
+}
 
-// Server function that will succeed but be traced
-const goodServerFunc = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return await Sentry.startSpan(
-    {
-      name: 'Successful server operation',
-      op: 'demo.success',
-    },
-    async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return { success: true }
-    },
-  )
-})
+const simulateServerTrace = async () => {
+  await sleep(600)
+  return { success: true }
+}
 
 function RouteComponent() {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
@@ -140,7 +114,7 @@ function RouteComponent() {
             triggered_at: new Date().toISOString(),
           })
 
-          await badServerFunc()
+          await simulateServerError()
         },
       )
     } catch (error) {
@@ -182,7 +156,7 @@ function RouteComponent() {
           op: 'demo.server',
         },
         async () => {
-          await goodServerFunc()
+          await simulateServerTrace()
         },
       )
       setSpanOps((prev) => ({ ...prev, server: 'demo.server' }))

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/demo/tanstack-query')({
   component: TanStackQueryDemo,
@@ -11,26 +11,68 @@ type Todo = {
   name: string
 }
 
+const STORAGE_KEY = 'demo_query_todos'
+const DEFAULT_TODOS: Array<Todo> = [
+  { id: 1, name: 'Draft welcome email' },
+  { id: 2, name: 'Confirm tribe head rota' },
+  { id: 3, name: 'Review prayer requests' },
+]
+const isBrowser = typeof window !== 'undefined'
+
+const loadTodos = (): Array<Todo> => {
+  if (isBrowser) {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        return JSON.parse(raw)
+      }
+    } catch {
+      // Ignore storage errors and fall back to defaults
+    }
+  }
+
+  return DEFAULT_TODOS
+}
+
+const persistTodos = (todos: Array<Todo>) => {
+  if (isBrowser) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  return todos
+}
+
 function TanStackQueryDemo() {
-  const { data, refetch } = useQuery<Array<Todo>>({
+  const queryClient = useQueryClient()
+  const { data = [] } = useQuery<Array<Todo>>({
     queryKey: ['todos'],
-    queryFn: () => fetch('/demo/api/tq-todos').then((res) => res.json()),
-    initialData: [],
+    queryFn: () => Promise.resolve(loadTodos()),
+    initialData: loadTodos(),
   })
 
-  const { mutate: addTodo } = useMutation({
-    mutationFn: (todo: string) =>
-      fetch('/demo/api/tq-todos', {
-        method: 'POST',
-        body: JSON.stringify(todo),
-      }).then((res) => res.json()),
-    onSuccess: () => refetch(),
+  const { mutateAsync: addTodo } = useMutation({
+    mutationFn: (todo: string) => {
+      const todos = loadTodos()
+      const nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1
+      const next = [...todos, { id: nextId, name: todo }]
+      return Promise.resolve(persistTodos(next))
+    },
+    onSuccess: (next) => {
+      queryClient.setQueryData<Array<Todo>>(['todos'], next)
+    },
   })
 
   const [todo, setTodo] = useState('')
 
   const submitTodo = useCallback(async () => {
-    await addTodo(todo)
+    const trimmed = todo.trim()
+    if (!trimmed) return
+
+    await addTodo(trimmed)
     setTodo('')
   }, [addTodo, todo])
 

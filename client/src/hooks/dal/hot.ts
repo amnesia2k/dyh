@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { ApiError, del, get, patch, post, setAccessToken } from '../api'
+import {
+  ApiError,
+  clearAccessToken,
+  getAccessToken,
+  setAccessToken,
+} from '../api'
 import { useAuthStore } from '../auth-store'
 
 export type HotRole = 'admin' | 'hot'
@@ -69,18 +74,93 @@ export const hotKeys = {
   current: () => [...hotKeys.all, 'current'] as const,
 }
 
-export async function fetchCurrentHot(): Promise<Hot | null> {
-  try {
-    return await get<Hot>('/hot/me')
-  } catch (error) {
-    if (error instanceof ApiError) {
-      if (error.status === 401 || error.status === 403) {
-        return null
-      }
-    }
+type HotRecord = Hot & { password: string }
 
-    throw error
+const STORAGE_KEY = 'dyh_mock_hots'
+const isBrowser = typeof window !== 'undefined'
+
+const createSeedHot = (): HotRecord => {
+  const now = new Date().toISOString()
+  return {
+    _id: 'hot-seed-1',
+    email: 'demo@dyh.test',
+    password: 'password123',
+    tribe: HOT_TRIBES[0].value,
+    role: 'hot',
+    name: 'Demo HOT',
+    bio: 'Demo user while the backend is disabled.',
+    phone: '+0000000000',
+    createdAt: now,
+    updatedAt: now,
+    imageUrl: 'https://placehold.co/96x96?text=HOT',
   }
+}
+
+let inMemoryHots: Array<HotRecord> | null = null
+
+const loadHots = (): Array<HotRecord> => {
+  if (inMemoryHots) {
+    return inMemoryHots
+  }
+
+  if (isBrowser) {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        inMemoryHots = JSON.parse(raw)
+        return inMemoryHots
+      }
+    } catch {
+      // Ignore storage issues and fall back to the seed user
+    }
+  }
+
+  inMemoryHots = [createSeedHot()]
+  return inMemoryHots
+}
+
+const persistHots = (hots: Array<HotRecord>) => {
+  inMemoryHots = hots
+
+  if (isBrowser) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(hots))
+    } catch {
+      // Ignore storage issues
+    }
+  }
+}
+
+const sanitizeHot = (record: HotRecord): Hot => {
+  const { password, ...hot } = record
+  return hot
+}
+
+const withLatency = async <T>(result: T, delay = 150) =>
+  await new Promise<T>((resolve) => setTimeout(() => resolve(result), delay))
+
+const generateId = () => {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID()
+  }
+
+  return `hot-${Math.random().toString(36).slice(2, 10)}`
+}
+
+const findByEmail = (email: string) =>
+  loadHots().find((hot) => hot.email.toLowerCase() === email.toLowerCase())
+
+export async function fetchCurrentHot(): Promise<Hot | null> {
+  const token = getAccessToken()
+  if (!token) {
+    return await withLatency(null)
+  }
+
+  const current = loadHots().find((hot) => hot._id === token)
+  return await withLatency(current ? sanitizeHot(current) : null)
 }
 
 export function useCurrentHotQuery() {
@@ -90,8 +170,9 @@ export function useCurrentHotQuery() {
   })
 }
 
-export function fetchHots() {
-  return get<Array<Hot>>('/hot')
+export async function fetchHots() {
+  const hots = loadHots().map(sanitizeHot)
+  return await withLatency(hots)
 }
 
 export function useHotsQuery() {
@@ -101,8 +182,14 @@ export function useHotsQuery() {
   })
 }
 
-export function fetchHot(id: string) {
-  return get<Hot>(`/hot/${id}`)
+export async function fetchHot(id: string) {
+  const hot = loadHots().find((record) => record._id === id)
+
+  if (!hot) {
+    throw new ApiError('Head of Tribe not found', { status: 404 })
+  }
+
+  return await withLatency(sanitizeHot(hot))
 }
 
 export function useHotQuery(id: string, options?: { enabled?: boolean }) {
@@ -113,24 +200,107 @@ export function useHotQuery(id: string, options?: { enabled?: boolean }) {
   })
 }
 
-export function registerHot(data: RegisterHotInput) {
-  return post<Hot>('/hot/register', data)
+export async function registerHot(data: RegisterHotInput) {
+  const existing = findByEmail(data.email)
+  if (existing) {
+    throw new ApiError('A user with this email already exists.', {
+      status: 409,
+    })
+  }
+
+  const now = new Date().toISOString()
+
+  const record: HotRecord = {
+    _id: generateId(),
+    role: 'hot',
+    password: data.password,
+    email: data.email,
+    tribe: data.tribe,
+    name: data.name,
+    bio: data.bio,
+    imageUrl: data.imageUrl,
+    phone: data.phone,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  const next = [...loadHots(), record]
+  persistHots(next)
+  setAccessToken(record._id)
+
+  return await withLatency({
+    ...sanitizeHot(record),
+    token: record._id,
+  })
 }
 
-export function loginHot(data: LoginHotInput) {
-  return post<Hot>('/hot/login', data)
+export async function loginHot(data: LoginHotInput) {
+  const existing = findByEmail(data.email)
+  if (!existing || existing.password !== data.password) {
+    throw new ApiError('Invalid email or password', { status: 401 })
+  }
+
+  const now = new Date().toISOString()
+  const updated: HotRecord = {
+    ...existing,
+    lastLogin: now,
+    updatedAt: now,
+  }
+
+  const hots = loadHots().map((hot) =>
+    hot._id === existing._id ? updated : hot,
+  )
+  persistHots(hots)
+  setAccessToken(updated._id)
+
+  return await withLatency({
+    ...sanitizeHot(updated),
+    token: updated._id,
+  })
 }
 
-export function logoutHot() {
-  return post<void>('/hot/logout')
+export async function logoutHot() {
+  clearAccessToken()
+  return await withLatency(undefined)
 }
 
-export function updateHot(id: string, data: UpdateHotInput) {
-  return patch<Hot>(`/hot/${id}`, data)
+export async function updateHot(id: string, data: UpdateHotInput) {
+  const hots = loadHots()
+  const index = hots.findIndex((hot) => hot._id === id)
+
+  if (index === -1) {
+    throw new ApiError('Head of Tribe not found', { status: 404 })
+  }
+
+  const now = new Date().toISOString()
+  const updated: HotRecord = {
+    ...hots[index],
+    ...data,
+    password: data.password ?? hots[index].password,
+    updatedAt: now,
+  }
+
+  const next = [...hots]
+  next[index] = updated
+  persistHots(next)
+
+  return await withLatency(sanitizeHot(updated))
 }
 
-export function deleteHot(id: string) {
-  return del<void>(`/hot/${id}`)
+export async function deleteHot(id: string) {
+  const hots = loadHots()
+  if (!hots.some((hot) => hot._id === id)) {
+    throw new ApiError('Head of Tribe not found', { status: 404 })
+  }
+
+  const next = hots.filter((hot) => hot._id !== id)
+  persistHots(next)
+
+  if (getAccessToken() === id) {
+    clearAccessToken()
+  }
+
+  return await withLatency(undefined)
 }
 
 export function useRegisterHotMutation() {

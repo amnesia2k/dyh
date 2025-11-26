@@ -31,7 +31,6 @@
   "type": "module",
   "workspaces": [
     "client",
-    "server",
-    "client-2"
+    "server"
   ]
 }

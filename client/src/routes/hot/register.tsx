@@ -38,14 +38,16 @@ function RouteComponent() {
       return
     }
 
+    const toastId = toast.loading('Uploading image...')
+
     try {
       const result = await uploadImage(file)
       setImageUrl(result.imageUrl)
-      toast.success('Image uploaded successfully')
+      toast.success('Image uploaded successfully', { id: toastId })
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to upload image'
-      toast.error(message)
+      toast.error(message, { id: toastId })
       setImageUrl(undefined)
     }
   }

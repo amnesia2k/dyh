@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/testimonies')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/testimonies"!</div>
+  return <div>Testimonies placeholder page.</div>
 }

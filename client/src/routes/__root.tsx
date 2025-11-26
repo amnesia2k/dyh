@@ -28,7 +28,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Decross Youth Hub - Joshua Generation',
+        title: 'TanStack Start Starter',
       },
     ],
     links: [
@@ -40,8 +40,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   }),
 
   shellComponent: RootDocument,
-
-  notFoundComponent: () => <div>Not Found</div>,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -50,9 +48,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans">
+      <body>
         {children}
-        <Toaster position="bottom-right" closeButton />
+        <Toaster position="bottom-right" />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/demo/tanstack-query')({
   component: TanStackQueryDemo,
@@ -11,74 +11,32 @@ type Todo = {
   name: string
 }
 
-const STORAGE_KEY = 'demo_query_todos'
-const DEFAULT_TODOS: Array<Todo> = [
-  { id: 1, name: 'Draft welcome email' },
-  { id: 2, name: 'Confirm tribe head rota' },
-  { id: 3, name: 'Review prayer requests' },
-]
-const isBrowser = typeof window !== 'undefined'
-
-const loadTodos = (): Array<Todo> => {
-  if (isBrowser) {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY)
-      if (raw) {
-        return JSON.parse(raw)
-      }
-    } catch {
-      // Ignore storage errors and fall back to defaults
-    }
-  }
-
-  return DEFAULT_TODOS
-}
-
-const persistTodos = (todos: Array<Todo>) => {
-  if (isBrowser) {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-    } catch {
-      // Ignore storage errors
-    }
-  }
-
-  return todos
-}
-
 function TanStackQueryDemo() {
-  const queryClient = useQueryClient()
-  const { data = [] } = useQuery<Array<Todo>>({
+  const { data, refetch } = useQuery<Todo[]>({
     queryKey: ['todos'],
-    queryFn: () => Promise.resolve(loadTodos()),
-    initialData: loadTodos(),
+    queryFn: () => fetch('/demo/api/tq-todos').then((res) => res.json()),
+    initialData: [],
   })
 
-  const { mutateAsync: addTodo } = useMutation({
-    mutationFn: (todo: string) => {
-      const todos = loadTodos()
-      const nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1
-      const next = [...todos, { id: nextId, name: todo }]
-      return Promise.resolve(persistTodos(next))
-    },
-    onSuccess: (next) => {
-      queryClient.setQueryData<Array<Todo>>(['todos'], next)
-    },
+  const { mutate: addTodo } = useMutation({
+    mutationFn: (todo: string) =>
+      fetch('/demo/api/tq-todos', {
+        method: 'POST',
+        body: JSON.stringify(todo),
+      }).then((res) => res.json()),
+    onSuccess: () => refetch(),
   })
 
   const [todo, setTodo] = useState('')
 
   const submitTodo = useCallback(async () => {
-    const trimmed = todo.trim()
-    if (!trimmed) return
-
-    await addTodo(trimmed)
+    await addTodo(todo)
     setTodo('')
   }, [addTodo, todo])
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-linear-to-br from-red-900 via-red-800 to-black p-4 text-white"
+      className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-black p-4 text-white"
       style={{
         backgroundImage:
           'radial-gradient(50% 50% at 80% 20%, #3B021F 0%, #7B1028 60%, #1A000A 100%)',
@@ -87,7 +45,7 @@ function TanStackQueryDemo() {
       <div className="w-full max-w-2xl p-8 rounded-xl backdrop-blur-md bg-black/50 shadow-xl border-8 border-black/10">
         <h1 className="text-2xl mb-4">TanStack Query Todos list</h1>
         <ul className="mb-4 space-y-2">
-          {data.map((t) => (
+          {data?.map((t) => (
             <li
               key={t.id}
               className="bg-white/10 border border-white/20 rounded-lg p-3 backdrop-blur-sm shadow-md"

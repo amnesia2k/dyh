@@ -32,6 +32,6 @@
   "workspaces": [
     "client",
     "server",
-    "dyh-web"
+    "client-2"
   ]
 }

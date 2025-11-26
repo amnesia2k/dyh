@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/announcements')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/announcements"!</div>
+  return <div>Announcements will live here.</div>
 }

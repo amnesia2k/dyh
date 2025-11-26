@@ -13,8 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HotRegisterRouteImport } from './routes/hot/register'
 import { Route as HotLoginRouteImport } from './routes/hot/login'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as appAboutRouteImport } from './routes/(app)/about'
-import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
 import { Route as HotDashboardRouteRouteImport } from './routes/hot/dashboard/route'
 import { Route as HotDashboardIndexRouteImport } from './routes/hot/dashboard/index'
 import { Route as HotDashboardTestimoniesRouteImport } from './routes/hot/dashboard/testimonies'
@@ -51,15 +49,6 @@ const HotLoginRoute = HotLoginRouteImport.update({
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAboutRoute = appAboutRouteImport.update({
-  id: '/(app)/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appLayoutRoute = appLayoutRouteImport.update({
-  id: '/(app)/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HotDashboardRouteRoute = HotDashboardRouteRouteImport.update({
@@ -155,7 +144,6 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
-  '/about': typeof appAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
@@ -178,7 +166,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof appAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
@@ -203,8 +190,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
-  '/(app)/_layout': typeof appLayoutRoute
-  '/(app)/about': typeof appAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
@@ -230,7 +215,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/hot/dashboard'
-    | '/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
@@ -253,7 +237,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
@@ -277,8 +260,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/hot/dashboard'
-    | '/(app)/_layout'
-    | '/(app)/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
@@ -303,8 +284,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HotDashboardRouteRoute: typeof HotDashboardRouteRouteWithChildren
-  appLayoutRoute: typeof appLayoutRoute
-  appAboutRoute: typeof appAboutRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   HotLoginRoute: typeof HotLoginRoute
   HotRegisterRoute: typeof HotRegisterRoute
@@ -347,20 +326,6 @@ declare module '@tanstack/react-router' {
       path: '/demo/tanstack-query'
       fullPath: '/demo/tanstack-query'
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/about': {
-      id: '/(app)/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof appAboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/_layout': {
-      id: '/(app)/_layout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof appLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hot/dashboard': {
@@ -511,8 +476,6 @@ const HotDashboardRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HotDashboardRouteRoute: HotDashboardRouteRouteWithChildren,
-  appLayoutRoute: appLayoutRoute,
-  appAboutRoute: appAboutRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   HotLoginRoute: HotLoginRoute,
   HotRegisterRoute: HotRegisterRoute,

@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/')({
 })
 
 function RouteComponent() {
-  return <div>Dashboard for HOT role</div>
+  return <div className="text-lg font-semibold">Head of Tribes Dashboard</div>
 }

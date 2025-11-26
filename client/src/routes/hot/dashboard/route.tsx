@@ -1,17 +1,12 @@
-import { Fragment, useEffect } from 'react'
 import {
   Outlet,
   createFileRoute,
-  redirect,
+  useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { Fragment } from 'react/jsx-runtime'
 import { AppSidebar } from '@/components/app-sidebar'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,49 +15,64 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { useAuthStore } from '@/hooks/auth-store'
-import { useCurrentHotQuery } from '@/hooks/dal/hot'
+import { Separator } from '@/components/ui/separator'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { useMeQuery } from '@/hooks/dal/auth'
+import { useAuthHydration, useAuthStore } from '@/hooks/auth-store'
 
 export const Route = createFileRoute('/hot/dashboard')({
-  // loader: () => {
-  //   if (typeof window === 'undefined') {
-  //     // On the server, do nothing and let the client rerun the loader.
-  //     return {}
-  //   }
-
-  //   const { isAuthenticated } = useAuthStore.getState()
-
-  //   if (!isAuthenticated) {
-  //     throw redirect({
-  //       to: '/hot/login',
-  //     })
-  //   }
-
-  //   return {}
-  // },
-
-  beforeLoad: () => {
-    const token =
-      typeof window !== 'undefined'
-        ? window.localStorage.getItem('dyh_access_token')
-        : null
-
-    if (!token) {
-      throw redirect({
-        to: '/hot/login',
-      })
-    }
-  },
-
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const setHot = useAuthStore((state) => state.setHot)
-  const { data: currentHot } = useCurrentHotQuery()
+  const navigate = useNavigate()
+  const token = useAuthStore((state) => state.token)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const setAuth = useAuthStore((state) => state.setAuth)
+  const clearAuth = useAuthStore((state) => state.clearAuth)
+  const hydrated = useAuthHydration()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+
+  const { data } = useMeQuery({
+    enabled: hydrated && Boolean(token),
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    throwOnError: false,
+    refetchOnWindowFocus: false,
+    onError: () => {
+      clearAuth()
+      navigate({
+        to: '/hot/login',
+        search: { redirect: '/hot/dashboard' },
+        replace: true,
+      })
+    },
+  })
+
+  useEffect(() => {
+    if (!hydrated) return
+
+    if (!isAuthenticated) {
+      navigate({
+        to: '/hot/login',
+        search: { redirect: '/hot/dashboard' },
+        replace: true,
+      })
+    }
+  }, [hydrated, isAuthenticated, navigate])
+
+  useEffect(() => {
+    if (data && token) {
+      setAuth({ token, user: data })
+    }
+  }, [data, setAuth, token])
 
   const segments = pathname.split('/').filter(Boolean)
   const dashboardIndex = segments.findIndex(
@@ -87,11 +97,9 @@ function RouteComponent() {
     }),
   ]
 
-  useEffect(() => {
-    if (currentHot) {
-      setHot(currentHot)
-    }
-  }, [currentHot, setHot])
+  if (!hydrated || !isAuthenticated) {
+    return null
+  }
 
   return (
     <SidebarProvider>

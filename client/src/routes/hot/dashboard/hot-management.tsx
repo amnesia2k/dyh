@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/hot-management')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/hot-management"!</div>
+  return <div>HOT management tools are coming soon.</div>
 }

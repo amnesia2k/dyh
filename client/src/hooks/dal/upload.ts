@@ -1,41 +1,15 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 
-import { ApiError } from '../api'
+import { uploadImage, type UploadImageResult } from '../api/upload'
 
-export interface UploadImageResult {
-  imageUrl: string
-  publicId: string
-  width: number
-  height: number
-  format: string
-}
-
-const simulateLatency = async <T>(result: T, delay = 300) =>
-  await new Promise<T>((resolve) => setTimeout(() => resolve(result), delay))
-
-export function uploadImage(file: File | null | undefined) {
-  if (!file) {
-    throw new ApiError('No image provided for upload')
-  }
-
-  const imageUrl =
-    typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
-      ? URL.createObjectURL(file)
-      : 'https://placehold.co/400x400?text=Upload'
-
-  const mimeType = file.type || 'image/jpeg'
-
-  return simulateLatency<UploadImageResult>({
-    imageUrl,
-    publicId: `local-${Date.now()}`,
-    width: 600,
-    height: 600,
-    format: mimeType.split('/')[1] ?? mimeType,
-  })
-}
-
-export function useUploadImageMutation() {
-  return useMutation<UploadImageResult, ApiError, File | null | undefined>({
+export function useUploadImageMutation(
+  options?: UseMutationOptions<UploadImageResult, Error, File>,
+) {
+  return useMutation<UploadImageResult, Error, File>({
+    mutationKey: ['upload', 'image'],
     mutationFn: uploadImage,
+    ...options,
   })
 }
+
+export type { UploadImageResult } from '../api/upload'

@@ -1,7 +1,7 @@
 {
   "initialized": true,
   "mode": "file-router",
-  "projectName": "dyh-client",
+  "projectName": "dyh-web",
   "typescript": true,
   "tailwind": true,
   "git": true,
@@ -12,7 +12,6 @@
   "chosenAddOns": [
     "netlify",
     "sentry",
-    "compiler",
     "shadcn",
     "start",
     "tanstack-query",

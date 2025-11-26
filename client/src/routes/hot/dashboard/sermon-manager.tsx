@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/sermon-manager')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/sermon-manager"!</div>
+  return <div>Sermon manager placeholder.</div>
 }

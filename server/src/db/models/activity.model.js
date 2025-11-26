@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { createId } from "@paralleldrive/cuid2";
 
-const ActivityLogSchema = new mongoose.Schema(
+const { Schema, Types } = mongoose;
+
+const ActivityLogSchema = new Schema(
   {
     _id: {
-      type: String,
-      default: () => createId(),
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
     },
 
     // actor: {

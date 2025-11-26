@@ -6,9 +6,8 @@ import {
   getSingleMember,
   updateMember,
 } from "../controllers/member.controller.js";
-import { validateRequest } from "zod-express-middleware";
-import { createMemberSchema, updateMemberSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { validateCreateMember, validateUpdateMember } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -98,7 +97,7 @@ router.get("/:id", protectRoute, getSingleMember);
  *       400:
  *         description: Validation error.
  */
-router.post("/", validateRequest({ body: createMemberSchema }), createMember);
+router.post("/", validateCreateMember, createMember);
 
 /**
  * @openapi
@@ -130,7 +129,7 @@ router.post("/", validateRequest({ body: createMemberSchema }), createMember);
  *       404:
  *         description: Member not found.
  */
-router.patch("/:id", validateRequest({ body: updateMemberSchema }), updateMember);
+router.patch("/:id", validateUpdateMember, updateMember);
 
 /**
  * @openapi

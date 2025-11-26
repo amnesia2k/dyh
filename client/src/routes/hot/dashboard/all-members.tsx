@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/all-members')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/all"!</div>
+  return <div>All members view coming soon.</div>
 }

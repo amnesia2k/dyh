@@ -1,10 +1,4 @@
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  LogOut,
-  Sparkles,
-} from 'lucide-react'
+import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
@@ -12,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -25,13 +18,12 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/hooks/auth-store'
-import { useLogoutHotMutation } from '@/hooks/dal/hot'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
-  const hot = useAuthStore((state) => state.hot)
-  const { mutateAsync: logout, isPending } = useLogoutHotMutation()
+  const hot = useAuthStore((state) => state.user)
+  const clearAuth = useAuthStore((state) => state.clearAuth)
 
   if (!hot) {
     return null
@@ -40,6 +32,16 @@ export function NavUser() {
   const name = hot.name ?? hot.email
   const email = hot.email
   const avatar = hot.imageUrl
+
+  const handleLogout = () => {
+    clearAuth()
+    toast.success('Logged out')
+    navigate({
+      to: '/hot/login',
+      search: { redirect: '/hot/dashboard' },
+      replace: true,
+    })
+  }
 
   return (
     <SidebarMenu>
@@ -90,43 +92,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              disabled={isPending}
-              onClick={async () => {
-                const promise = logout()
-
-                toast.promise(promise, {
-                  loading: 'Logging out...',
-                  success: 'Logged out',
-                  error: 'Failed to log out. Please try again.',
-                })
-
-                try {
-                  await promise
-                  navigate({ to: '/hot/login' })
-                } catch {
-                  // toast already handled
-                }
-              }}
-            >
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,31 +1,89 @@
+import { useEffect, useState } from 'react'
 import { create } from 'zustand'
-import { clearAccessToken, getAccessToken } from './api'
-import type { Hot, HotRole } from './dal/hot'
+import { createJSONStorage, persist } from 'zustand/middleware'
+import type { StateStorage } from 'zustand/middleware'
 
-export interface AuthState {
-  hot: Hot | null
-  isAuthenticated: boolean
-  setHot: (hot: Hot | null) => void
-  hasRole: (role: HotRole) => boolean
-  hasAnyRole: (roles: Array<HotRole>) => boolean
-  logout: () => void
+export type HotUser = {
+  _id: string
+  email: string
+  name?: string
+  bio?: string
+  tribe: string
+  role: 'admin' | 'hot'
+  lastLogin?: string
+  imageUrl?: string
+  phone?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  hot: null,
-  isAuthenticated: !!getAccessToken(),
-  setHot: (hot) => set({ hot, isAuthenticated: !!hot }),
-  hasRole: (role) => {
-    const current = get().hot
-    return current?.role === role
-  },
-  hasAnyRole: (roles) => {
-    const current = get().hot
-    if (!current) return false
-    return roles.includes(current.role)
-  },
-  logout: () => {
-    clearAccessToken()
-    set({ hot: null, isAuthenticated: false })
-  },
-}))
+type AuthState = {
+  token?: string
+  user?: HotUser
+  isAuthenticated: boolean
+  setAuth: (payload: { token: string; user: HotUser }) => void
+  clearAuth: () => void
+}
+
+const noopStorage: StateStorage = {
+  getItem: () => null,
+  setItem: () => undefined,
+  removeItem: () => undefined,
+}
+
+const storage = createJSONStorage<AuthState>(() =>
+  typeof window === 'undefined' ? noopStorage : window.localStorage,
+)
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: undefined,
+      user: undefined,
+      isAuthenticated: false,
+      setAuth: ({ token, user }) =>
+        set({
+          token,
+          user,
+          isAuthenticated: Boolean(token),
+        }),
+      clearAuth: () =>
+        set({
+          token: undefined,
+          user: undefined,
+          isAuthenticated: false,
+        }),
+    }),
+    {
+      name: 'auth-store',
+      storage,
+      merge: (persistedState, currentState) => {
+        const merged = {
+          ...currentState,
+          ...(persistedState as Partial<AuthState>),
+        }
+        merged.isAuthenticated = Boolean(merged.token)
+        return merged
+      },
+    },
+  ),
+)
+
+export function useAuthHydration() {
+  const [hydrated, setHydrated] = useState(useAuthStore.persist.hasHydrated())
+
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true)
+      return
+    }
+
+    const unsub = useAuthStore.persist.onFinishHydration(() => {
+      setHydrated(true)
+    })
+
+    return () => unsub()
+  }, [])
+
+  return hydrated
+}

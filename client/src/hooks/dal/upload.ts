@@ -1,29 +1,15 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 
-import { post } from '../api'
-import type { ApiError } from '../api'
+import { uploadImage, type UploadImageResult } from '../api/upload'
 
-export interface UploadImageResult {
-  imageUrl: string
-  publicId: string
-  width: number
-  height: number
-  format: string
-}
-
-export function uploadImage(file: File) {
-  const formData = new FormData()
-  formData.append('image', file)
-
-  return post<UploadImageResult, FormData>('/upload/image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-}
-
-export function useUploadImageMutation() {
-  return useMutation<UploadImageResult, ApiError, File>({
+export function useUploadImageMutation(
+  options?: UseMutationOptions<UploadImageResult, Error, File>,
+) {
+  return useMutation<UploadImageResult, Error, File>({
+    mutationKey: ['upload', 'image'],
     mutationFn: uploadImage,
+    ...options,
   })
 }
+
+export type { UploadImageResult } from '../api/upload'

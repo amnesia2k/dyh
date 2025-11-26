@@ -5,5 +5,5 @@ export const Route = createFileRoute('/hot/dashboard/prayer-requests')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/hot/dashboard/prayer-requests"!</div>
+  return <div>Prayer requests will be managed here.</div>
 }

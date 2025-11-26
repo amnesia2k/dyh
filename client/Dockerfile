@@ -2,19 +2,19 @@
 
 # WORKDIR /app
 
-# # Copy only root and client manifests first
+# # Copy only root + client manifests first
 # COPY package.json bun.lock ./
 # COPY client/package.json ./client/
 
 # # Install ONLY client workspace dependencies (cached)
 # RUN bun install --cwd ./client
 
-# # Copy client source AFTER dependencies
+# # Copy client source AFTER deps
 # COPY client ./client
 
 # WORKDIR /app/client
 
-# EXPOSE 3000
+# EXPOSE 8000
 # CMD ["bun", "dev"]
 
 FROM oven/bun:latest
@@ -28,10 +28,10 @@ COPY package.json ./package.json
 # Copy ONLY client’s workspace manifest
 COPY client/package.json ./client/package.json
 
-# Copy the entire repo (to access client code)
+# Copy the entire repo
 COPY . .
 
-# Install deps for the client workspace
+# Install deps for client workspace
 RUN bun install --cwd ./client
 
 WORKDIR /app/client
@@ -51,6 +51,6 @@ CMD ["bun", "dev"]
 # # Copy the rest of the application
 # COPY . .
 
-# EXPOSE 3000
+# EXPOSE 8000
 
 # CMD ["bun", "dev"]

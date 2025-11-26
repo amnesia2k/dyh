@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
-import { createId } from "@paralleldrive/cuid2";
 import bcrypt from "bcryptjs";
 
-const HotSchema = new mongoose.Schema(
+const { Schema, Types } = mongoose;
+
+const HotSchema = new Schema(
   {
     _id: {
-      type: String,
-      default: () => createId(),
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
     },
 
     email: {

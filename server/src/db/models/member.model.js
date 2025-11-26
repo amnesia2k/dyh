@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { createId } from "@paralleldrive/cuid2";
 
-const MemberSchema = new mongoose.Schema(
+const { Schema, Types } = mongoose;
+
+const MemberSchema = new Schema(
   {
     _id: {
-      type: String,
-      default: () => createId(),
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
     },
 
     fullName: {

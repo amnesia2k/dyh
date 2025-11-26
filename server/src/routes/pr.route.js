@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { validateRequest } from "zod-express-middleware";
-import { createPrSchema, updatePrSchema } from "../utils/validate-schema.js";
+import { validateCreatePr, validateUpdatePr } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { createPR, getAllPRs, getSinglePR, updatePRStatus } from "../controllers/pr.controller.js";
 
@@ -38,7 +37,7 @@ const router = Router();
  *       400:
  *         description: Validation error.
  */
-router.post("/", validateRequest({ body: createPrSchema }), createPR);
+router.post("/", validateCreatePr, createPR);
 
 /**
  * @openapi
@@ -107,6 +106,6 @@ router.get("/:id", getSinglePR);
  *       404:
  *         description: Prayer request not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updatePrSchema }), updatePRStatus);
+router.patch("/:id", protectRoute, validateUpdatePr, updatePRStatus);
 
 export default router;

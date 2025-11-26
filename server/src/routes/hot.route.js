@@ -10,8 +10,7 @@ import {
   updateHot,
 } from "../controllers/hot.controller.js";
 import { adminGuard, protectRoute } from "../middleware/auth.middleware.js";
-import { loginSchema, registerSchema, updateSchema } from "../utils/validate-schema.js";
-import { validateRequest } from "zod-express-middleware";
+import { validateLogin, validateRegister, validateUpdate } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -112,7 +111,7 @@ router.get("/:id", getSingleHot);
  *       400:
  *         description: Validation or conflict error.
  */
-router.post("/register", validateRequest({ body: registerSchema }), registerHot);
+router.post("/register", validateRegister, registerHot);
 
 /**
  * @openapi
@@ -143,7 +142,7 @@ router.post("/register", validateRequest({ body: registerSchema }), registerHot)
  *       401:
  *         description: Invalid credentials.
  */
-router.post("/login", validateRequest({ body: loginSchema }), loginHot);
+router.post("/login", validateLogin, loginHot);
 
 /**
  * @openapi
@@ -192,7 +191,7 @@ router.post("/logout", protectRoute, logoutHot);
  *       404:
  *         description: HOT not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updateSchema }), updateHot);
+router.patch("/:id", protectRoute, validateUpdate, updateHot);
 
 /**
  * @openapi

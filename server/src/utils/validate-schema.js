@@ -1,138 +1,404 @@
-import { z } from "zod";
+import { body } from "express-validator";
+import { checkErrors } from "../middleware/checkErrors.js";
 
-// Auth schemas
-export const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  tribe: z.string().min(1, "Tribe is required"),
-  bio: z.string().optional(),
-  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
-  phone: z.string().optional(),
-});
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+const statusValues = ["new", "read", "resolved"];
 
-export const updateSchema = registerSchema.partial();
+export const validateRegister = [
+  body("name")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Name is required")
+    .isString()
+    .withMessage("Name must be a string"),
 
-export const loginSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
+  body("email")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email address"),
 
-// Member schemas
-export const createMemberSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
-  email: z.email("Invalid email address").optional().or(z.literal("")),
-  phone: z.string().min(1, "Phone number is required").optional().or(z.literal("")),
-  birthday: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+  body("password")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Password is required")
+    .bail()
+    .isString()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+
+  body("tribe")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Tribe is required")
+    .isString()
+    .withMessage("Tribe must be a string"),
+
+  body("bio").optional({ checkFalsy: true }).isString().withMessage("Bio must be a string"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  body("phone").optional({ checkFalsy: true }).isString().withMessage("Phone must be a string"),
+
+  checkErrors,
+];
+
+export const validateUpdate = [
+  body("name").optional().isString().isLength({ min: 1 }).withMessage("Name is required"),
+
+  body("email").optional().isEmail().withMessage("Invalid email address"),
+
+  body("password")
     .optional()
-    .or(z.literal("")),
-  address: z.string().optional().or(z.literal("")),
-  departmentOfInterest: z.string().optional().or(z.literal("")),
-  joinedAt: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
-    .optional()
-    .or(z.literal("")),
-  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
-});
+    .isString()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
 
-export const updateMemberSchema = createMemberSchema.partial();
+  body("tribe").optional().isString().withMessage("Tribe must be a string"),
 
-// Sermon schemas
-export const createSermonSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  spotifyEmbedUrl: z.string().url("Invalid Spotify embed URL").optional().or(z.literal("")),
-  description: z.string().optional().or(z.literal("")),
-  speaker: z.string().optional().or(z.literal("")),
-});
+  body("bio").optional({ checkFalsy: true }).isString().withMessage("Bio must be a string"),
 
-export const updateSermonSchema = createSermonSchema.partial();
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
 
-// Event schemas
-export const createEventSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  location: z.string().optional().or(z.literal("")),
-  description: z.string().optional().or(z.literal("")),
-  featured: z.boolean().optional(),
-  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
-});
+  body("phone").optional({ checkFalsy: true }).isString().withMessage("Phone must be a string"),
 
-export const updateEventSchema = createEventSchema.partial();
+  checkErrors,
+];
 
-// Announcement schemas
-export const createAnnouncementSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  summary: z.string().optional().or(z.literal("")),
-  body: z.string().optional().or(z.literal("")),
-  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
-});
+export const validateLogin = [
+  body("email")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email address"),
 
-export const updateAnnouncementSchema = createAnnouncementSchema.partial();
+  body("password")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Password is required")
+    .bail()
+    .isString()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
 
-export const createPrSchema = z
-  .object({
-    fullName: z.string().optional().or(z.literal("")),
-    email: z.email("Invalid email address").optional().or(z.literal("")),
-    message: z.string().min(1, "Message is required"),
-    anonymous: z.boolean().optional().default(false),
-    status: z.enum(["new", "read", "resolved"]).optional().default("new"),
-  })
-  .superRefine((v, ctx) => {
-    if (!v.anonymous) {
-      if (!v.fullName || v.fullName.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["fullName"],
-          message: "Full name is required",
-        });
-      }
-      if (!v.email || v.email.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["email"],
-          message: "Email is required",
-        });
-      }
-    }
-  });
+  checkErrors,
+];
 
-export const updatePrSchema = createPrSchema.partial();
+export const validateCreateMember = [
+  body("fullName")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Full name is required")
+    .isString()
+    .withMessage("Full name must be a string"),
 
-export const createTestimonySchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
-  email: z.email("Invalid email address").min(1, "Email is required"),
-  message: z.string().min(1, "Message is required"),
-  anonymous: z.boolean().optional(),
-  status: z.enum(["new", "read", "resolved"]).optional(),
-});
+  body("email").optional({ checkFalsy: true }).isEmail().withMessage("Invalid email address"),
 
-export const updateTestimonySchema = z.object({
-  status: z.enum(["new", "read", "resolved"]).optional(),
-  featured: z.boolean().optional(),
-  approved: z.boolean().optional(),
-  approvedAt: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
-    .optional(),
-});
+  body("phone")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Phone number must be a string"),
 
-// // HOT (Head of Tribe) schemas
-// export const createHotSchema = z.object({
-//   fullName: z.string().min(1, "Name is required"),
-//   tribe: z.string().min(1, "Tribe is required"),
-//   photo: z.string().url("Invalid photo URL").optional().or(z.literal("")),
-//   phone: z.string().optional().or(z.literal("")),
-//   email: z.string().email("Invalid email address").optional().or(z.literal("")),
-// });
+  body("birthday")
+    .optional({ checkFalsy: true })
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
 
-// export const updateHotSchema = createHotSchema.partial();
+  body("address").optional({ checkFalsy: true }).isString().withMessage("Address must be a string"),
 
-// export { registerSchema, loginSchema };
+  body("departmentOfInterest")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Department of interest must be a string"),
 
-// birthday: z.string().datetime({ offset: true }).optional().or(z.literal("")),
-// birthday: z.iso.datetime({ local: true }).optional().or(z.literal("")),
+  body("joinedAt")
+    .optional({ checkFalsy: true })
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateUpdateMember = [
+  body("fullName").optional().isString().isLength({ min: 1 }).withMessage("Full name is required"),
+
+  body("email").optional().isEmail().withMessage("Invalid email address"),
+
+  body("phone")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Phone number must be a string"),
+
+  body("birthday")
+    .optional({ checkFalsy: true })
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("address").optional({ checkFalsy: true }).isString().withMessage("Address must be a string"),
+
+  body("departmentOfInterest")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Department of interest must be a string"),
+
+  body("joinedAt")
+    .optional({ checkFalsy: true })
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateCreateSermon = [
+  body("title")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Title is required")
+    .isString()
+    .withMessage("Title must be a string"),
+
+  body("date")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Date is required")
+    .bail()
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("spotifyEmbedUrl")
+    .optional({ checkFalsy: true })
+    .isURL()
+    .withMessage("Invalid Spotify embed URL"),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Description must be a string"),
+
+  body("speaker").optional({ checkFalsy: true }).isString().withMessage("Speaker must be a string"),
+
+  checkErrors,
+];
+
+export const validateUpdateSermon = [
+  body("title").optional().isString().isLength({ min: 1 }).withMessage("Title is required"),
+
+  body("date").optional().matches(dateRegex).withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("spotifyEmbedUrl")
+    .optional({ checkFalsy: true })
+    .isURL()
+    .withMessage("Invalid Spotify embed URL"),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Description must be a string"),
+
+  body("speaker").optional({ checkFalsy: true }).isString().withMessage("Speaker must be a string"),
+
+  checkErrors,
+];
+
+export const validateCreateEvent = [
+  body("title")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Title is required")
+    .isString()
+    .withMessage("Title must be a string"),
+
+  body("date")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Date is required")
+    .bail()
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("location")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Location must be a string"),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Description must be a string"),
+
+  body("featured").optional().isBoolean().withMessage("Featured must be a boolean"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateUpdateEvent = [
+  body("title").optional().isString().isLength({ min: 1 }).withMessage("Title is required"),
+
+  body("date").optional().matches(dateRegex).withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("location")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Location must be a string"),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Description must be a string"),
+
+  body("featured").optional().isBoolean().withMessage("Featured must be a boolean"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateCreateAnnouncement = [
+  body("title")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Title is required")
+    .isString()
+    .withMessage("Title must be a string"),
+
+  body("date")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Date is required")
+    .bail()
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("summary").optional({ checkFalsy: true }).isString().withMessage("Summary must be a string"),
+
+  body("body").optional({ checkFalsy: true }).isString().withMessage("Body must be a string"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateUpdateAnnouncement = [
+  body("title").optional().isString().isLength({ min: 1 }).withMessage("Title is required"),
+
+  body("date").optional().matches(dateRegex).withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  body("summary").optional({ checkFalsy: true }).isString().withMessage("Summary must be a string"),
+
+  body("body").optional({ checkFalsy: true }).isString().withMessage("Body must be a string"),
+
+  body("imageUrl").optional({ checkFalsy: true }).isURL().withMessage("Invalid image URL"),
+
+  checkErrors,
+];
+
+export const validateCreatePr = [
+  body("fullName")
+    .if((value, { req }) => !req.body.anonymous)
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Full name is required"),
+
+  body("fullName")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Full name must be a string"),
+
+  body("email")
+    .if((value, { req }) => !req.body.anonymous)
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Email is required"),
+
+  body("email").optional({ checkFalsy: true }).isEmail().withMessage("Invalid email address"),
+
+  body("message")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Message is required")
+    .bail()
+    .isString()
+    .withMessage("Message must be a string"),
+
+  body("anonymous").optional().isBoolean().withMessage("Anonymous must be a boolean"),
+
+  body("status")
+    .optional({ checkFalsy: true })
+    .isIn(statusValues)
+    .withMessage("Status must be one of: new, read, resolved"),
+
+  checkErrors,
+];
+
+export const validateUpdatePr = [
+  body("fullName")
+    .if((value, { req }) => !req.body.anonymous)
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Full name is required"),
+
+  body("fullName")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Full name must be a string"),
+
+  body("email")
+    .if((value, { req }) => !req.body.anonymous)
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Email is required"),
+
+  body("email").optional({ checkFalsy: true }).isEmail().withMessage("Invalid email address"),
+
+  body("message").optional().isString().isLength({ min: 1 }).withMessage("Message is required"),
+
+  body("anonymous").optional().isBoolean().withMessage("Anonymous must be a boolean"),
+
+  body("status")
+    .optional({ checkFalsy: true })
+    .isIn(statusValues)
+    .withMessage("Status must be one of: new, read, resolved"),
+
+  checkErrors,
+];
+
+export const validateCreateTestimony = [
+  body("fullName")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Full name is required")
+    .isString()
+    .withMessage("Full name must be a string"),
+
+  body("email")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email address"),
+
+  body("message")
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage("Message is required")
+    .bail()
+    .isString()
+    .withMessage("Message must be a string"),
+
+  body("anonymous").optional().isBoolean().withMessage("Anonymous must be a boolean"),
+
+  body("status")
+    .optional({ checkFalsy: true })
+    .isIn(statusValues)
+    .withMessage("Status must be one of: new, read, resolved"),
+
+  checkErrors,
+];
+
+export const validateUpdateTestimony = [
+  body("status")
+    .optional({ checkFalsy: true })
+    .isIn(statusValues)
+    .withMessage("Status must be one of: new, read, resolved"),
+
+  body("featured").optional().isBoolean().withMessage("Featured must be a boolean"),
+
+  body("approved").optional().isBoolean().withMessage("Approved must be a boolean"),
+
+  body("approvedAt")
+    .optional({ checkFalsy: true })
+    .matches(dateRegex)
+    .withMessage("Invalid date format (YYYY-MM-DD)"),
+
+  checkErrors,
+];

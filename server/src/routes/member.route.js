@@ -6,9 +6,8 @@ import {
   getSingleMember,
   updateMember,
 } from "../controllers/member.controller.js";
-import { validateRequest } from "zod-express-middleware";
-import { createMemberSchema, updateMemberSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { validateCreateMember, validateUpdateMember } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -22,6 +21,7 @@ const router = Router();
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Members fetched successfully.
@@ -38,6 +38,7 @@ router.get("/", protectRoute, getAllMembers);
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -96,7 +97,7 @@ router.get("/:id", protectRoute, getSingleMember);
  *       400:
  *         description: Validation error.
  */
-router.post("/", validateRequest({ body: createMemberSchema }), createMember);
+router.post("/", validateCreateMember, createMember);
 
 /**
  * @openapi
@@ -108,6 +109,7 @@ router.post("/", validateRequest({ body: createMemberSchema }), createMember);
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -127,7 +129,7 @@ router.post("/", validateRequest({ body: createMemberSchema }), createMember);
  *       404:
  *         description: Member not found.
  */
-router.patch("/:id", validateRequest({ body: updateMemberSchema }), updateMember);
+router.patch("/:id", validateUpdateMember, updateMember);
 
 /**
  * @openapi
@@ -139,6 +141,7 @@ router.patch("/:id", validateRequest({ body: updateMemberSchema }), updateMember
  *       - Members
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

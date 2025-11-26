@@ -10,8 +10,7 @@ import {
   updateHot,
 } from "../controllers/hot.controller.js";
 import { adminGuard, protectRoute } from "../middleware/auth.middleware.js";
-import { loginSchema, registerSchema, updateSchema } from "../utils/validate-schema.js";
-import { validateRequest } from "zod-express-middleware";
+import { validateLogin, validateRegister, validateUpdate } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -20,11 +19,12 @@ const router = Router();
  * /hot/me:
  *   get:
  *     summary: Get current HOT profile
- *     description: Returns the currently authenticated HOT user (based on cookie token).
+ *     description: Returns the currently authenticated HOT user (based on cookie or Bearer token).
  *     tags:
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Current HOT fetched successfully.
@@ -111,7 +111,7 @@ router.get("/:id", getSingleHot);
  *       400:
  *         description: Validation or conflict error.
  */
-router.post("/register", validateRequest({ body: registerSchema }), registerHot);
+router.post("/register", validateRegister, registerHot);
 
 /**
  * @openapi
@@ -142,18 +142,19 @@ router.post("/register", validateRequest({ body: registerSchema }), registerHot)
  *       401:
  *         description: Invalid credentials.
  */
-router.post("/login", validateRequest({ body: loginSchema }), loginHot);
+router.post("/login", validateLogin, loginHot);
 
 /**
  * @openapi
  * /hot/logout:
  *   post:
  *     summary: Logout current HOT
- *     description: Clears the authentication cookie for the current HOT.
+ *     description: Clears the authentication cookie for the current HOT (if using cookie auth).
  *     tags:
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logout successful.
@@ -170,6 +171,7 @@ router.post("/logout", protectRoute, logoutHot);
  *       - HOT
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -189,7 +191,7 @@ router.post("/logout", protectRoute, logoutHot);
  *       404:
  *         description: HOT not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updateSchema }), updateHot);
+router.patch("/:id", protectRoute, validateUpdate, updateHot);
 
 /**
  * @openapi

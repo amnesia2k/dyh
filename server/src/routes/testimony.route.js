@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { validateRequest } from "zod-express-middleware";
 import {
   createTestimony,
   deleteTestimony,
@@ -7,8 +6,8 @@ import {
   getTestimonyById,
   updateTestimony,
 } from "../controllers/testimony.controller.js";
-import { createTestimonySchema, updateTestimonySchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { validateCreateTestimony, validateUpdateTestimony } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -83,7 +82,7 @@ router.get("/:id", getTestimonyById);
  *       400:
  *         description: Validation error.
  */
-router.post("/", validateRequest({ body: createTestimonySchema }), createTestimony);
+router.post("/", validateCreateTestimony, createTestimony);
 
 /**
  * @openapi
@@ -95,6 +94,7 @@ router.post("/", validateRequest({ body: createTestimonySchema }), createTestimo
  *       - Testimonies
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -114,12 +114,7 @@ router.post("/", validateRequest({ body: createTestimonySchema }), createTestimo
  *       404:
  *         description: Testimony not found.
  */
-router.patch(
-  "/:id",
-  protectRoute,
-  validateRequest({ body: updateTestimonySchema }),
-  updateTestimony
-);
+router.patch("/:id", protectRoute, validateUpdateTestimony, updateTestimony);
 
 /**
  * @openapi
@@ -131,6 +126,7 @@ router.patch(
  *       - Testimonies
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

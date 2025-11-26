@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { createId } from "@paralleldrive/cuid2";
 
-const SermonSchema = new mongoose.Schema(
+const { Schema, Types } = mongoose;
+
+const SermonSchema = new Schema(
   {
     _id: {
-      type: String,
-      default: () => createId(),
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
     },
 
     title: {

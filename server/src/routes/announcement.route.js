@@ -6,9 +6,11 @@ import {
   getAnnouncements,
   updateAnnouncement,
 } from "../controllers/announcement.controller.js";
-import { validateRequest } from "zod-express-middleware";
-import { createAnnouncementSchema, updateAnnouncementSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import {
+  validateCreateAnnouncement,
+  validateUpdateAnnouncement,
+} from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -65,6 +67,7 @@ router.get("/:id", getAnnouncementById);
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -91,12 +94,7 @@ router.get("/:id", getAnnouncementById);
  *       201:
  *         description: Announcement created successfully.
  */
-router.post(
-  "/",
-  protectRoute,
-  validateRequest({ body: createAnnouncementSchema }),
-  createAnnouncement
-);
+router.post("/", protectRoute, validateCreateAnnouncement, createAnnouncement);
 
 /**
  * @openapi
@@ -108,6 +106,7 @@ router.post(
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -127,12 +126,7 @@ router.post(
  *       404:
  *         description: Announcement not found.
  */
-router.patch(
-  "/:id",
-  protectRoute,
-  validateRequest({ body: updateAnnouncementSchema }),
-  updateAnnouncement
-);
+router.patch("/:id", protectRoute, validateUpdateAnnouncement, updateAnnouncement);
 
 /**
  * @openapi
@@ -144,6 +138,7 @@ router.patch(
  *       - Announcements
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -1,0 +1,21 @@
+{
+  "initialized": true,
+  "mode": "file-router",
+  "projectName": "dyh-client",
+  "typescript": true,
+  "tailwind": true,
+  "git": true,
+  "addOnOptions": {},
+  "packageManager": "bun",
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "netlify",
+    "sentry",
+    "compiler",
+    "shadcn",
+    "start",
+    "tanstack-query",
+    "eslint"
+  ]
+}

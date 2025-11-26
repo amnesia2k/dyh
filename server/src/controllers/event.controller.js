@@ -1,16 +1,14 @@
 import Event from "../db/models/event.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { response } from "../utils/response.js";
 
 export const createEvent = async (req, res) => {
   try {
     const { title, date, location, description, featured, imageUrl } = req.body;
 
     if (!title || !date) {
-      return res.status(400).json({
-        message: "Title and date are required",
-        success: false,
-      });
+      return response(res, 400, "Title and date are required");
     }
 
     const event = await Event.create({
@@ -22,20 +20,14 @@ export const createEvent = async (req, res) => {
       imageUrl,
     });
 
-    await logActivity("EVENT", "NEW", event);
+    logActivity("EVENT", "NEW", event);
 
     logger.info("Event created:", event._id);
 
-    return res.status(201).json({
-      message: "Event created",
-      success: true,
-      data: event,
-    });
+    return response(res, 201, "Event created", event);
   } catch (error) {
     logger.error("Error creating event:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server error",
+    return response(res, 500, "Internal Server error", undefined, {
       error: error.message,
     });
   }
@@ -56,17 +48,12 @@ export const getEvents = async (req, res) => {
 
     logger.info(`Fetched ${events.length} events`);
 
-    return res.status(200).json({
-      message: "Events fetched",
-      success: true,
+    return response(res, 200, "Events fetched", events, {
       count,
-      data: events,
     });
   } catch (error) {
     logger.error("Error fetching events:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server error",
+    return response(res, 500, "Internal Server error", undefined, {
       error: error.message,
     });
   }
@@ -77,24 +64,15 @@ export const getEventById = async (req, res) => {
     const event = await Event.findById(req.params.id);
 
     if (!event) {
-      return res.status(404).json({
-        message: "Event not found",
-        success: false,
-      });
+      return response(res, 404, "Event not found");
     }
 
     logger.info("Fetched event:", event._id);
 
-    return res.status(200).json({
-      message: "Event fetched",
-      success: true,
-      data: event,
-    });
+    return response(res, 200, "Event fetched", event);
   } catch (error) {
     logger.error("Error fetching event by id:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server error",
+    return response(res, 500, "Internal Server error", undefined, {
       error: error.message,
     });
   }
@@ -109,26 +87,17 @@ export const updateEvent = async (req, res) => {
     );
 
     if (!event) {
-      return res.status(404).json({
-        message: "Event not found",
-        success: false,
-      });
+      return response(res, 404, "Event not found");
     }
 
-    await logActivity("EVENT", "UPDATED", event);
+    logActivity("EVENT", "UPDATED", event);
 
     logger.info("Updated event:", event._id);
 
-    return res.status(200).json({
-      message: "Event updated",
-      success: true,
-      data: event,
-    });
+    return response(res, 200, "Event updated", event);
   } catch (error) {
     logger.error("Error updating event:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server error",
+    return response(res, 500, "Internal Server error", undefined, {
       error: error.message,
     });
   }
@@ -139,25 +108,17 @@ export const deleteEvent = async (req, res) => {
     const event = await Event.findByIdAndDelete(req.params.id);
 
     if (!event) {
-      return res.status(404).json({
-        message: "Event not found",
-        success: false,
-      });
+      return response(res, 404, "Event not found");
     }
 
-    await logActivity("EVENT", "DELETED", event);
+    logActivity("EVENT", "DELETED", event);
 
     logger.info("Deleted event:", event._id);
 
-    return res.status(200).json({
-      message: "Event deleted",
-      success: true,
-    });
+    return response(res, 200, "Event deleted");
   } catch (error) {
     logger.error("Error deleting event:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server error",
+    return response(res, 500, "Internal Server error", undefined, {
       error: error.message,
     });
   }

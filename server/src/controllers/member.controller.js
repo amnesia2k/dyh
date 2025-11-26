@@ -1,6 +1,7 @@
 import Member from "../db/models/member.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { response } from "../utils/response.js";
 
 /**
  * Create a new member
@@ -19,10 +20,7 @@ export const createMember = async (req, res) => {
     } = req.body;
 
     if (!fullName || !email || !phone || !birthday || !address) {
-      return res.status(400).json({
-        success: false,
-        message: "Full name and email are required.",
-      });
+      return response(res, 400, "Full name and email are required.");
     }
 
     // ✅ Convert birthday from "YYYY-MM-DD" string to Date (if provided)
@@ -30,10 +28,7 @@ export const createMember = async (req, res) => {
     if (birthday && birthday.trim() !== "") {
       const date = new Date(birthday);
       if (isNaN(date.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid birthday format. Expected YYYY-MM-DD.",
-        });
+        return response(res, 400, "Invalid birthday format. Expected YYYY-MM-DD.");
       }
       parsedBirthday = date;
     }
@@ -49,18 +44,12 @@ export const createMember = async (req, res) => {
       joinedAt,
     });
 
-    await logActivity("MEMBER", "NEW", member);
+    logActivity("MEMBER", "NEW", member);
 
-    return res.status(201).json({
-      message: "Member created successfully",
-      success: true,
-      data: member,
-    });
+    return response(res, 201, "Member created successfully", member);
   } catch (error) {
     logger.error("Create Member Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create member",
+    return response(res, 500, "Failed to create member", undefined, {
       error: error.message,
     });
   }
@@ -73,16 +62,11 @@ export const getAllMembers = async (req, res) => {
   try {
     const members = await Member.find().sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      message: "Members fetched successfully",
-      success: true,
+    return response(res, 200, "Members fetched successfully", members, {
       count: members.length,
-      data: members,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch members",
+    return response(res, 500, "Failed to fetch members", undefined, {
       error: error.message,
     });
   }
@@ -98,21 +82,12 @@ export const getSingleMember = async (req, res) => {
     const member = await Member.findById(id);
 
     if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: "Member not found",
-      });
+      return response(res, 404, "Member not found");
     }
 
-    return res.status(200).json({
-      message: "Member fetched successfully",
-      success: true,
-      data: member,
-    });
+    return response(res, 200, "Member fetched successfully", member);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch member",
+    return response(res, 500, "Failed to fetch member", undefined, {
       error: error.message,
     });
   }
@@ -131,23 +106,14 @@ export const updateMember = async (req, res) => {
     });
 
     if (!updatedMember) {
-      return res.status(404).json({
-        message: "Member not found",
-        success: false,
-      });
+      return response(res, 404, "Member not found");
     }
 
-    await logActivity("MEMBER", "UPDATED", updatedMember);
+    logActivity("MEMBER", "UPDATED", updatedMember);
 
-    return res.status(200).json({
-      message: "Member updated successfully",
-      success: true,
-      data: updatedMember,
-    });
+    return response(res, 200, "Member updated successfully", updatedMember);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update member",
+    return response(res, 500, "Failed to update member", undefined, {
       error: error.message,
     });
   }
@@ -163,23 +129,14 @@ export const deleteMember = async (req, res) => {
     const deletedMember = await Member.findByIdAndDelete(id);
 
     if (!deletedMember) {
-      return res.status(404).json({
-        message: "Member not found",
-        success: false,
-      });
+      return response(res, 404, "Member not found");
     }
 
-    await logActivity("MEMBER", "DELETED", deletedMember);
+    logActivity("MEMBER", "DELETED", deletedMember);
 
-    return res.status(200).json({
-      message: "Member deleted successfully",
-      success: true,
-      // data: deletedMember,
-    });
+    return response(res, 200, "Member deleted successfully");
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete member",
+    return response(res, 500, "Failed to delete member", undefined, {
       error: error.message,
     });
   }

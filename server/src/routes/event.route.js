@@ -6,9 +6,8 @@ import {
   getEvents,
   updateEvent,
 } from "../controllers/event.controller.js";
-import { validateRequest } from "zod-express-middleware";
-import { createEventSchema, updateEventSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { validateCreateEvent, validateUpdateEvent } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -65,6 +64,7 @@ router.get("/:id", getEventById);
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -93,7 +93,7 @@ router.get("/:id", getEventById);
  *       201:
  *         description: Event created successfully.
  */
-router.post("/", protectRoute, validateRequest({ body: createEventSchema }), createEvent);
+router.post("/", protectRoute, validateCreateEvent, createEvent);
 
 /**
  * @openapi
@@ -105,6 +105,7 @@ router.post("/", protectRoute, validateRequest({ body: createEventSchema }), cre
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -124,7 +125,7 @@ router.post("/", protectRoute, validateRequest({ body: createEventSchema }), cre
  *       404:
  *         description: Event not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updateEventSchema }), updateEvent);
+router.patch("/:id", protectRoute, validateUpdateEvent, updateEvent);
 
 /**
  * @openapi
@@ -136,6 +137,7 @@ router.patch("/:id", protectRoute, validateRequest({ body: updateEventSchema }),
  *       - Events
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

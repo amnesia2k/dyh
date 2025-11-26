@@ -1,6 +1,7 @@
 import Sermon from "../db/models/sermon.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { response } from "../utils/response.js";
 
 /**
  * @desc Create a new sermon
@@ -11,7 +12,7 @@ export const createSermon = async (req, res) => {
     const { title, date, spotifyEmbedUrl, description, speaker } = req.body;
 
     if (!title || !date || !spotifyEmbedUrl || !description || !speaker) {
-      return res.status(400).json({ message: "All fields are required", success: false });
+      return response(res, 400, "All fields are required");
     }
 
     const sermon = await Sermon.create({
@@ -22,13 +23,15 @@ export const createSermon = async (req, res) => {
       speaker,
     });
 
-    await logActivity("SERMON", "NEW", sermon);
+    logActivity("SERMON", "NEW", sermon);
 
     logger.info("Sermon created:", sermon._id);
-    res.status(201).json({ message: "Sermon created", success: true, data: sermon });
+    return response(res, 201, "Sermon created", sermon);
   } catch (error) {
     logger.error("Error creating sermon:", error);
-    res.status(500).json({ message: "Internal Server error", success: false });
+    return response(res, 500, "Internal Server error", undefined, {
+      error: error.message,
+    });
   }
 };
 
@@ -50,15 +53,12 @@ export const getSermons = async (req, res) => {
     const count = await Sermon.countDocuments();
 
     logger.info(`Fetched ${sermons.length} sermons`);
-    res.status(200).json({
-      message: "Sermons fetched",
-      success: true,
-      count,
-      data: sermons,
-    });
+    return response(res, 200, "Sermons fetched", sermons, { count });
   } catch (error) {
     logger.error("Error fetching sermons:", error);
-    res.status(500).json({ message: "Internal Server error", success: false });
+    return response(res, 500, "Internal Server error", undefined, {
+      error: error.message,
+    });
   }
 };
 
@@ -71,16 +71,18 @@ export const getSermonById = async (req, res) => {
     const sermon = await Sermon.findById(req.params.id);
 
     if (!sermon) {
-      return res.status(404).json({ message: "Sermon not found", success: false });
+      return response(res, 404, "Sermon not found");
     }
 
-    await logActivity("SERMON", "UPDATED", sermon);
+    logActivity("SERMON", "UPDATED", sermon);
 
     logger.info("Fetched sermon:", sermon._id);
-    res.status(200).json({ message: "Sermon fetched", success: true, data: sermon });
+    return response(res, 200, "Sermon fetched", sermon);
   } catch (error) {
     logger.error("Error fetching sermon by id:", error);
-    res.status(500).json({ message: "Internal Server error", success: false });
+    return response(res, 500, "Internal Server error", undefined, {
+      error: error.message,
+    });
   }
 };
 
@@ -97,16 +99,18 @@ export const updateSermon = async (req, res) => {
     );
 
     if (!sermon) {
-      return res.status(404).json({ message: "Sermon not found", success: false });
+      return response(res, 404, "Sermon not found");
     }
 
-    await logActivity("SERMON", "DELETED", sermon);
+    logActivity("SERMON", "DELETED", sermon);
 
     logger.info("Updated sermon:", sermon._id);
-    res.status(200).json({ message: "Sermon updated", success: true, data: sermon });
+    return response(res, 200, "Sermon updated", sermon);
   } catch (error) {
     logger.error("Error updating sermon:", error);
-    res.status(500).json({ message: "Internal Server error", success: false });
+    return response(res, 500, "Internal Server error", undefined, {
+      error: error.message,
+    });
   }
 };
 
@@ -119,13 +123,15 @@ export const deleteSermon = async (req, res) => {
     const sermon = await Sermon.findByIdAndDelete(req.params.id);
 
     if (!sermon) {
-      return res.status(404).json({ success: false, message: "Sermon not found" });
+      return response(res, 404, "Sermon not found");
     }
 
     logger.info("Deleted sermon:", sermon._id);
-    res.status(200).json({ message: "Sermon deleted", success: true });
+    return response(res, 200, "Sermon deleted");
   } catch (error) {
     logger.error("Error deleting sermon:", error);
-    res.status(500).json({ message: "Internal Server error", success: false });
+    return response(res, 500, "Internal Server error", undefined, {
+      error: error.message,
+    });
   }
 };

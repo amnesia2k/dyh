@@ -6,9 +6,8 @@ import {
   getSermons,
   updateSermon,
 } from "../controllers/sermon.controller.js";
-import { validateRequest } from "zod-express-middleware";
-import { createSermonSchema, updateSermonSchema } from "../utils/validate-schema.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { validateCreateSermon, validateUpdateSermon } from "../utils/validate-schema.js";
 
 const router = Router();
 
@@ -65,6 +64,7 @@ router.get("/:id", getSermonById);
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -92,7 +92,7 @@ router.get("/:id", getSermonById);
  *       400:
  *         description: Validation error.
  */
-router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), createSermon);
+router.post("/", protectRoute, validateCreateSermon, createSermon);
 
 /**
  * @openapi
@@ -104,6 +104,7 @@ router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), cr
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -123,7 +124,7 @@ router.post("/", protectRoute, validateRequest({ body: createSermonSchema }), cr
  *       404:
  *         description: Sermon not found.
  */
-router.patch("/:id", protectRoute, validateRequest({ body: updateSermonSchema }), updateSermon);
+router.patch("/:id", protectRoute, validateUpdateSermon, updateSermon);
 
 /**
  * @openapi
@@ -135,6 +136,7 @@ router.patch("/:id", protectRoute, validateRequest({ body: updateSermonSchema })
  *       - Sermons
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

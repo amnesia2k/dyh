@@ -14,5 +14,3 @@ todos.json
 
 # Local Netlify folder
 .netlify
-
-routeTree.gen.ts

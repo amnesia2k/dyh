@@ -5,7 +5,11 @@ import { response } from "../utils/response.js";
 
 export async function protectRoute(req, res, next) {
   try {
-    const token = req.cookies?.token || req.headers?.authorization?.split?.("Bearer ")?.[1];
+    // Accept token from cookies or Authorization header (Bearer scheme).
+    // Split by spaces so it works even if Swagger/UI prefixes "Bearer " automatically
+    // and the user also pastes a value that already includes "Bearer ".
+    const tokenFromHeader = req.headers?.authorization?.split?.(" ")?.filter(Boolean)?.pop();
+    const token = req.cookies?.token || tokenFromHeader;
     if (!token) {
       return response(res, 401, "Unauthorized: You must be logged in to access this route");
     }

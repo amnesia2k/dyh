@@ -9,6 +9,7 @@ import eventRoute from "./event.route.js";
 import announcementRoute from "./announcement.route.js";
 import uploadRoute from "./upload.route.js";
 import healthRoute from "./health.route.js";
+import instagramRoute from "./instagram.route.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/activity", activityRoute);
 router.use("/event", eventRoute);
 router.use("/announcement", announcementRoute);
 router.use("/upload", uploadRoute);
+router.use("/instagram", instagramRoute);
 
 export default router;

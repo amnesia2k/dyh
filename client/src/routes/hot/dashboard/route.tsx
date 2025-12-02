@@ -1,12 +1,13 @@
 import {
+  Link,
   Outlet,
   createFileRoute,
-  useNavigate,
+  redirect,
+  useLoaderData,
   useRouterState,
 } from '@tanstack/react-router'
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { Fragment } from 'react/jsx-runtime'
-import { toast } from 'sonner'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   Breadcrumb,
@@ -22,67 +23,49 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { useMeQuery } from '@/hooks/dal/auth'
-import { useAuthHydration, useAuthStore } from '@/hooks/auth-store'
+import { meQueryOptions } from '@/hooks/dal/auth'
+import { useAuthStore } from '@/hooks/auth-store'
 
 export const Route = createFileRoute('/hot/dashboard')({
+  loader: async ({ context: { queryClient } }) => {
+    if (!useAuthStore.persist.hasHydrated()) {
+      await useAuthStore.persist.rehydrate()
+    }
+
+    try {
+      return await queryClient.ensureQueryData(
+        meQueryOptions({
+          retry: false,
+          staleTime: 5 * 60 * 1000,
+          gcTime: 10 * 60 * 1000,
+          refetchOnWindowFocus: false,
+          throwOnError: false,
+        }),
+      )
+    } catch (error) {
+      useAuthStore.getState().clearAuth()
+      throw redirect({
+        to: '/hot/login',
+        search: { redirect: '/hot/dashboard' },
+      })
+    }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const navigate = useNavigate()
-  const token = useAuthStore((state) => state.token)
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const user = useLoaderData({ from: Route.id })
   const setAuth = useAuthStore((state) => state.setAuth)
-  const clearAuth = useAuthStore((state) => state.clearAuth)
-  const hydrated = useAuthHydration()
+  const token = useAuthStore((state) => state.token)
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const hasShownAuthToast = useRef(false)
-
-  const showAuthToast = useCallback(() => {
-    if (hasShownAuthToast.current) return
-    hasShownAuthToast.current = true
-    toast.error('You need to be logged in to access dashboard')
-  }, [])
-
-  const { data } = useMeQuery({
-    enabled: hydrated && Boolean(token),
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    throwOnError: false,
-    refetchOnWindowFocus: false,
-    onError: () => {
-      clearAuth()
-      showAuthToast()
-      navigate({
-        to: '/hot/login',
-        search: { redirect: '/hot/dashboard' },
-        replace: true,
-      })
-    },
-  })
 
   useEffect(() => {
-    if (!hydrated) return
-
-    if (!isAuthenticated) {
-      showAuthToast()
-      navigate({
-        to: '/hot/login',
-        search: { redirect: '/hot/dashboard' },
-        replace: true,
-      })
+    if (token) {
+      setAuth({ token, user })
     }
-  }, [hydrated, isAuthenticated, navigate, showAuthToast])
-
-  useEffect(() => {
-    if (data && token) {
-      setAuth({ token, user: data })
-    }
-  }, [data, setAuth, token])
+  }, [setAuth, token, user])
 
   const segments = pathname.split('/').filter(Boolean)
   const dashboardIndex = segments.findIndex(
@@ -107,16 +90,12 @@ function RouteComponent() {
     }),
   ]
 
-  if (!hydrated || !isAuthenticated) {
-    return null
-  }
-
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar user={user} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-5">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
+          <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -153,6 +132,12 @@ function RouteComponent() {
                 })}
               </BreadcrumbList>
             </Breadcrumb>
+          </div>
+
+          <div className="whitespace-nowrap">
+            <Link to="/" className="text-sm underline">
+              Go to website
+            </Link>
           </div>
         </header>
 

@@ -3,6 +3,7 @@ import {
   BookOpen,
   BookOpenText,
   Command,
+  Instagram,
   LayoutDashboard,
   Megaphone,
   MessageCircle,
@@ -57,6 +58,11 @@ const navMainItems = [
     title: 'Sermon Manager',
     url: '/hot/dashboard/sermon-manager',
     icon: BookOpenText,
+  },
+  {
+    title: 'Gallery',
+    url: '/hot/dashboard/gallery',
+    icon: Instagram,
   },
   {
     title: 'Announcements',

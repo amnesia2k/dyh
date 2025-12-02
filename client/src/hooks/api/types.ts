@@ -163,3 +163,15 @@ export type HealthCheck = {
   status: string
   timestamp: string
 }
+
+export type InstagramPost = {
+  _id: string
+  url: string
+  embedHtml: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type CreateInstagramPostPayload = {
+  url: string
+}

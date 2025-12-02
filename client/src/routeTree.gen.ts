@@ -13,6 +13,7 @@ import { Route as jgRouteRouteImport } from './routes/(jg)/route'
 import { Route as jgIndexRouteImport } from './routes/(jg)/index'
 import { Route as HotRegisterRouteImport } from './routes/hot/register'
 import { Route as HotLoginRouteImport } from './routes/hot/login'
+import { Route as jgGalleryRouteImport } from './routes/(jg)/gallery'
 import { Route as jgAboutRouteImport } from './routes/(jg)/about'
 import { Route as HotDashboardRouteRouteImport } from './routes/hot/dashboard/route'
 import { Route as HotDashboardIndexRouteImport } from './routes/hot/dashboard/index'
@@ -20,6 +21,7 @@ import { Route as HotDashboardTestimoniesRouteImport } from './routes/hot/dashbo
 import { Route as HotDashboardSermonManagerRouteImport } from './routes/hot/dashboard/sermon-manager'
 import { Route as HotDashboardPrayerRequestsRouteImport } from './routes/hot/dashboard/prayer-requests'
 import { Route as HotDashboardHotManagementRouteImport } from './routes/hot/dashboard/hot-management'
+import { Route as HotDashboardGalleryRouteImport } from './routes/hot/dashboard/gallery'
 import { Route as HotDashboardAnnouncementsRouteImport } from './routes/hot/dashboard/announcements'
 import { Route as HotDashboardAllMembersRouteImport } from './routes/hot/dashboard/all-members'
 
@@ -41,6 +43,11 @@ const HotLoginRoute = HotLoginRouteImport.update({
   id: '/hot/login',
   path: '/hot/login',
   getParentRoute: () => rootRouteImport,
+} as any)
+const jgGalleryRoute = jgGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => jgRouteRoute,
 } as any)
 const jgAboutRoute = jgAboutRouteImport.update({
   id: '/about',
@@ -80,6 +87,11 @@ const HotDashboardHotManagementRoute =
     path: '/hot-management',
     getParentRoute: () => HotDashboardRouteRoute,
   } as any)
+const HotDashboardGalleryRoute = HotDashboardGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => HotDashboardRouteRoute,
+} as any)
 const HotDashboardAnnouncementsRoute =
   HotDashboardAnnouncementsRouteImport.update({
     id: '/announcements',
@@ -95,11 +107,13 @@ const HotDashboardAllMembersRoute = HotDashboardAllMembersRouteImport.update({
 export interface FileRoutesByFullPath {
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
   '/about': typeof jgAboutRoute
+  '/gallery': typeof jgGalleryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
   '/': typeof jgIndexRoute
   '/hot/dashboard/all-members': typeof HotDashboardAllMembersRoute
   '/hot/dashboard/announcements': typeof HotDashboardAnnouncementsRoute
+  '/hot/dashboard/gallery': typeof HotDashboardGalleryRoute
   '/hot/dashboard/hot-management': typeof HotDashboardHotManagementRoute
   '/hot/dashboard/prayer-requests': typeof HotDashboardPrayerRequestsRoute
   '/hot/dashboard/sermon-manager': typeof HotDashboardSermonManagerRoute
@@ -108,11 +122,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/about': typeof jgAboutRoute
+  '/gallery': typeof jgGalleryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
   '/': typeof jgIndexRoute
   '/hot/dashboard/all-members': typeof HotDashboardAllMembersRoute
   '/hot/dashboard/announcements': typeof HotDashboardAnnouncementsRoute
+  '/hot/dashboard/gallery': typeof HotDashboardGalleryRoute
   '/hot/dashboard/hot-management': typeof HotDashboardHotManagementRoute
   '/hot/dashboard/prayer-requests': typeof HotDashboardPrayerRequestsRoute
   '/hot/dashboard/sermon-manager': typeof HotDashboardSermonManagerRoute
@@ -124,11 +140,13 @@ export interface FileRoutesById {
   '/(jg)': typeof jgRouteRouteWithChildren
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
   '/(jg)/about': typeof jgAboutRoute
+  '/(jg)/gallery': typeof jgGalleryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
   '/(jg)/': typeof jgIndexRoute
   '/hot/dashboard/all-members': typeof HotDashboardAllMembersRoute
   '/hot/dashboard/announcements': typeof HotDashboardAnnouncementsRoute
+  '/hot/dashboard/gallery': typeof HotDashboardGalleryRoute
   '/hot/dashboard/hot-management': typeof HotDashboardHotManagementRoute
   '/hot/dashboard/prayer-requests': typeof HotDashboardPrayerRequestsRoute
   '/hot/dashboard/sermon-manager': typeof HotDashboardSermonManagerRoute
@@ -140,11 +158,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/hot/dashboard'
     | '/about'
+    | '/gallery'
     | '/hot/login'
     | '/hot/register'
     | '/'
     | '/hot/dashboard/all-members'
     | '/hot/dashboard/announcements'
+    | '/hot/dashboard/gallery'
     | '/hot/dashboard/hot-management'
     | '/hot/dashboard/prayer-requests'
     | '/hot/dashboard/sermon-manager'
@@ -153,11 +173,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
+    | '/gallery'
     | '/hot/login'
     | '/hot/register'
     | '/'
     | '/hot/dashboard/all-members'
     | '/hot/dashboard/announcements'
+    | '/hot/dashboard/gallery'
     | '/hot/dashboard/hot-management'
     | '/hot/dashboard/prayer-requests'
     | '/hot/dashboard/sermon-manager'
@@ -168,11 +190,13 @@ export interface FileRouteTypes {
     | '/(jg)'
     | '/hot/dashboard'
     | '/(jg)/about'
+    | '/(jg)/gallery'
     | '/hot/login'
     | '/hot/register'
     | '/(jg)/'
     | '/hot/dashboard/all-members'
     | '/hot/dashboard/announcements'
+    | '/hot/dashboard/gallery'
     | '/hot/dashboard/hot-management'
     | '/hot/dashboard/prayer-requests'
     | '/hot/dashboard/sermon-manager'
@@ -216,6 +240,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/hot/login'
       preLoaderRoute: typeof HotLoginRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(jg)/gallery': {
+      id: '/(jg)/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof jgGalleryRouteImport
+      parentRoute: typeof jgRouteRoute
     }
     '/(jg)/about': {
       id: '/(jg)/about'
@@ -266,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HotDashboardHotManagementRouteImport
       parentRoute: typeof HotDashboardRouteRoute
     }
+    '/hot/dashboard/gallery': {
+      id: '/hot/dashboard/gallery'
+      path: '/gallery'
+      fullPath: '/hot/dashboard/gallery'
+      preLoaderRoute: typeof HotDashboardGalleryRouteImport
+      parentRoute: typeof HotDashboardRouteRoute
+    }
     '/hot/dashboard/announcements': {
       id: '/hot/dashboard/announcements'
       path: '/announcements'
@@ -285,11 +323,13 @@ declare module '@tanstack/react-router' {
 
 interface jgRouteRouteChildren {
   jgAboutRoute: typeof jgAboutRoute
+  jgGalleryRoute: typeof jgGalleryRoute
   jgIndexRoute: typeof jgIndexRoute
 }
 
 const jgRouteRouteChildren: jgRouteRouteChildren = {
   jgAboutRoute: jgAboutRoute,
+  jgGalleryRoute: jgGalleryRoute,
   jgIndexRoute: jgIndexRoute,
 }
 
@@ -299,6 +339,7 @@ const jgRouteRouteWithChildren =
 interface HotDashboardRouteRouteChildren {
   HotDashboardAllMembersRoute: typeof HotDashboardAllMembersRoute
   HotDashboardAnnouncementsRoute: typeof HotDashboardAnnouncementsRoute
+  HotDashboardGalleryRoute: typeof HotDashboardGalleryRoute
   HotDashboardHotManagementRoute: typeof HotDashboardHotManagementRoute
   HotDashboardPrayerRequestsRoute: typeof HotDashboardPrayerRequestsRoute
   HotDashboardSermonManagerRoute: typeof HotDashboardSermonManagerRoute
@@ -309,6 +350,7 @@ interface HotDashboardRouteRouteChildren {
 const HotDashboardRouteRouteChildren: HotDashboardRouteRouteChildren = {
   HotDashboardAllMembersRoute: HotDashboardAllMembersRoute,
   HotDashboardAnnouncementsRoute: HotDashboardAnnouncementsRoute,
+  HotDashboardGalleryRoute: HotDashboardGalleryRoute,
   HotDashboardHotManagementRoute: HotDashboardHotManagementRoute,
   HotDashboardPrayerRequestsRoute: HotDashboardPrayerRequestsRoute,
   HotDashboardSermonManagerRoute: HotDashboardSermonManagerRoute,

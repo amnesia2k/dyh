@@ -40,6 +40,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   }),
 
   shellComponent: RootDocument,
+
+  notFoundComponent: () => {
+    return (
+      <div>
+        <h1>404 Not Found</h1>
+        <p>The page you are looking for does not exist.</p>
+      </div>
+    )
+  },
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -47,6 +56,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script async src="//www.instagram.com/embed.js"></script>
       </head>
       <body>
         {children}

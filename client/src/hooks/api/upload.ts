@@ -1,11 +1,6 @@
-import axios from 'axios'
 import { api } from '../api-client'
-
-type ApiResponse<T> = {
-  success: boolean
-  message: string
-  data: T
-}
+import { formatApiError, unwrapData } from './common'
+import type { ApiResponse } from './common'
 
 export type UploadImageResult = {
   imageUrl: string
@@ -30,21 +25,8 @@ export async function uploadImage(file: File) {
       },
     )
 
-    return response.data.data
+    return unwrapData(response.data)
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const message =
-        typeof error.response?.data?.message === 'string'
-          ? error.response.data.message
-          : error.message
-
-      throw new Error(message)
-    }
-
-    if (error instanceof Error) {
-      throw error
-    }
-
-    throw new Error('Failed to upload image')
+    throw formatApiError(error)
   }
 }

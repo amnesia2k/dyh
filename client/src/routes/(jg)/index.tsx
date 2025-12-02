@@ -1,16 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import {
-  Zap,
-  Server,
   Route as RouteIcon,
+  Server,
   Shield,
-  Waves,
   Sparkles,
+  Waves,
+  Zap,
 } from 'lucide-react'
+import { hotsQueryOptions } from '@/hooks/dal/hot'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/(jg)/')({
+  loader: ({ context: { queryClient } }) =>
+    queryClient.ensureQueryData(hotsQueryOptions()),
+  component: App,
+})
 
 function App() {
+  const data = useLoaderData({ from: Route.id })
   const features = [
     {
       icon: <Zap className="w-12 h-12 text-cyan-400" />,
@@ -49,6 +55,8 @@ function App() {
         'Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.',
     },
   ]
+
+  console.log('DATA >>>', data)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">

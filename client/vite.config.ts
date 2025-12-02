@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -11,6 +12,12 @@ import { nitro } from 'nitro/vite'
 // const isCI = process.env.CI === 'true' // IMPORTANT FIX
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve('./src'),
+    },
+  },
+
   plugins: [
     devtools(),
 

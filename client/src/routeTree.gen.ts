@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as jgRouteRouteImport } from './routes/(jg)/route'
+import { Route as jgIndexRouteImport } from './routes/(jg)/index'
 import { Route as HotRegisterRouteImport } from './routes/hot/register'
 import { Route as HotLoginRouteImport } from './routes/hot/login'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as jgAboutRouteImport } from './routes/(jg)/about'
 import { Route as HotDashboardRouteRouteImport } from './routes/hot/dashboard/route'
 import { Route as HotDashboardIndexRouteImport } from './routes/hot/dashboard/index'
 import { Route as HotDashboardTestimoniesRouteImport } from './routes/hot/dashboard/testimonies'
@@ -31,10 +33,14 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
-const IndexRoute = IndexRouteImport.update({
+const jgRouteRoute = jgRouteRouteImport.update({
+  id: '/(jg)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const jgIndexRoute = jgIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => jgRouteRoute,
 } as any)
 const HotRegisterRoute = HotRegisterRouteImport.update({
   id: '/hot/register',
@@ -50,6 +56,11 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
   getParentRoute: () => rootRouteImport,
+} as any)
+const jgAboutRoute = jgAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => jgRouteRoute,
 } as any)
 const HotDashboardRouteRoute = HotDashboardRouteRouteImport.update({
   id: '/hot/dashboard',
@@ -142,11 +153,12 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
+  '/about': typeof jgAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
+  '/': typeof jgIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -165,10 +177,11 @@ export interface FileRoutesByFullPath {
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/about': typeof jgAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
+  '/': typeof jgIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -188,11 +201,13 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/(jg)': typeof jgRouteRouteWithChildren
   '/hot/dashboard': typeof HotDashboardRouteRouteWithChildren
+  '/(jg)/about': typeof jgAboutRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/hot/login': typeof HotLoginRoute
   '/hot/register': typeof HotRegisterRoute
+  '/(jg)/': typeof jgIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -213,11 +228,12 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/hot/dashboard'
+    | '/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
+    | '/'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/sentry/testing'
@@ -236,10 +252,11 @@ export interface FileRouteTypes {
     | '/demo/start/ssr'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
+    | '/'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/sentry/testing'
@@ -258,11 +275,13 @@ export interface FileRouteTypes {
     | '/demo/start/ssr'
   id:
     | '__root__'
-    | '/'
+    | '/(jg)'
     | '/hot/dashboard'
+    | '/(jg)/about'
     | '/demo/tanstack-query'
     | '/hot/login'
     | '/hot/register'
+    | '/(jg)/'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/sentry/testing'
@@ -282,7 +301,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  jgRouteRoute: typeof jgRouteRouteWithChildren
   HotDashboardRouteRoute: typeof HotDashboardRouteRouteWithChildren
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   HotLoginRoute: typeof HotLoginRoute
@@ -300,12 +319,19 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/(jg)': {
+      id: '/(jg)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof jgRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(jg)/': {
+      id: '/(jg)/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof jgIndexRouteImport
+      parentRoute: typeof jgRouteRoute
     }
     '/hot/register': {
       id: '/hot/register'
@@ -327,6 +353,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/tanstack-query'
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(jg)/about': {
+      id: '/(jg)/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof jgAboutRouteImport
+      parentRoute: typeof jgRouteRoute
     }
     '/hot/dashboard': {
       id: '/hot/dashboard'
@@ -450,6 +483,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface jgRouteRouteChildren {
+  jgAboutRoute: typeof jgAboutRoute
+  jgIndexRoute: typeof jgIndexRoute
+}
+
+const jgRouteRouteChildren: jgRouteRouteChildren = {
+  jgAboutRoute: jgAboutRoute,
+  jgIndexRoute: jgIndexRoute,
+}
+
+const jgRouteRouteWithChildren =
+  jgRouteRoute._addFileChildren(jgRouteRouteChildren)
+
 interface HotDashboardRouteRouteChildren {
   HotDashboardAllMembersRoute: typeof HotDashboardAllMembersRoute
   HotDashboardAnnouncementsRoute: typeof HotDashboardAnnouncementsRoute
@@ -474,7 +520,7 @@ const HotDashboardRouteRouteWithChildren =
   HotDashboardRouteRoute._addFileChildren(HotDashboardRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  jgRouteRoute: jgRouteRouteWithChildren,
   HotDashboardRouteRoute: HotDashboardRouteRouteWithChildren,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   HotLoginRoute: HotLoginRoute,

@@ -1,12 +1,7 @@
-import axios from 'axios'
 import { api } from '../api-client'
+import { formatApiError, unwrapData } from './common'
+import type { ApiResponse } from './common'
 import type { HotUser } from '../auth-store'
-
-type ApiResponse<T> = {
-  success: boolean
-  message: string
-  data: T
-}
 
 export type LoginPayload = {
   email: string
@@ -34,7 +29,7 @@ export async function login(payload: LoginPayload) {
       payload,
     )
 
-    return response.data.data
+    return unwrapData(response.data)
   } catch (error) {
     throw formatApiError(error)
   }
@@ -47,7 +42,7 @@ export async function registerHot(payload: RegisterPayload) {
       payload,
     )
 
-    return response.data.data
+    return unwrapData(response.data)
   } catch (error) {
     throw formatApiError(error)
   }
@@ -57,25 +52,18 @@ export async function fetchMe() {
   try {
     const response = await api.get<ApiResponse<HotUser>>('/hot/me')
 
-    return response.data.data
+    return unwrapData(response.data)
   } catch (error) {
     throw formatApiError(error)
   }
 }
 
-function formatApiError(error: unknown) {
-  if (axios.isAxiosError(error)) {
-    const message =
-      typeof error.response?.data?.message === 'string'
-        ? error.response.data.message
-        : error.message
+export async function logout() {
+  try {
+    const response = await api.post<ApiResponse>('/hot/logout')
 
-    return new Error(message)
+    return response.data.message
+  } catch (error) {
+    throw formatApiError(error)
   }
-
-  if (error instanceof Error) {
-    return error
-  }
-
-  return new Error('Something went wrong. Please try again.')
 }

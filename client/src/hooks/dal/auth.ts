@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { fetchMe, login, registerHot } from '../api/auth'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchMe, login, logout, registerHot } from '../api/auth'
 import type {
   UseMutationOptions,
   UseMutationResult,
@@ -13,6 +13,7 @@ import type {
   RegisterPayload,
 } from '../api/auth'
 import type { HotUser } from '../auth-store'
+import { DEFAULT_STALE_TIME } from './query-defaults'
 
 type MeQueryKey = ['auth', 'me']
 type MeQueryOptions = Omit<
@@ -25,30 +26,65 @@ type MeQueryOptions = Omit<
 export function useLoginMutation(
   options?: UseMutationOptions<AuthenticatedHot, Error, LoginPayload>,
 ): UseMutationResult<AuthenticatedHot, Error, LoginPayload> {
+  const queryClient = useQueryClient()
+  const { onSuccess, ...rest } = options ?? {}
+
   return useMutation({
     mutationKey: ['auth', 'login'],
     mutationFn: login,
-    ...options,
+    async onSuccess(data, variables, context, mutation) {
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      await onSuccess?.(data, variables, context, mutation)
+    },
+    ...rest,
   })
 }
 
 export function useRegisterMutation(
   options?: UseMutationOptions<AuthenticatedHot, Error, RegisterPayload>,
 ): UseMutationResult<AuthenticatedHot, Error, RegisterPayload> {
+  const queryClient = useQueryClient()
+  const { onSuccess, ...rest } = options ?? {}
+
   return useMutation({
     mutationKey: ['auth', 'register'],
     mutationFn: registerHot,
-    ...options,
+    async onSuccess(data, variables, context, mutation) {
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      await onSuccess?.(data, variables, context, mutation)
+    },
+    ...rest,
   })
 }
 
 export function useMeQuery(
   options?: MeQueryOptions,
 ): UseQueryResult<HotUser, Error> {
+  const { staleTime, ...rest } = options ?? {}
+
   return useQuery({
     queryKey: ['auth', 'me'],
     queryFn: fetchMe,
-    ...options,
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  })
+}
+
+export function useLogoutMutation(
+  options?: UseMutationOptions<string, Error, void>,
+): UseMutationResult<string, Error, void> {
+  const queryClient = useQueryClient()
+  const { onSuccess, ...rest } = options ?? {}
+
+  return useMutation({
+    mutationKey: ['auth', 'logout'],
+    mutationFn: () => logout(),
+    async onSuccess(data, variables, context, mutation) {
+      await queryClient.removeQueries({ queryKey: ['auth', 'me'] })
+      await queryClient.invalidateQueries({ queryKey: ['hot'] })
+      await onSuccess?.(data, variables, context, mutation)
+    },
+    ...rest,
   })
 }
 

@@ -1,6 +1,9 @@
-import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import { uploadImage, type UploadImageResult } from '../api/upload'
+import { uploadImage } from '../api/upload'
+import type { UseMutationOptions } from '@tanstack/react-query'
+
+import type { UploadImageResult } from '../api/upload'
 
 export function useUploadImageMutation(
   options?: UseMutationOptions<UploadImageResult, Error, File>,

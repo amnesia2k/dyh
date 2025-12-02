@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react'
 
+import type { HotUser } from '@/hooks/auth-store'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
 import {
@@ -21,6 +22,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  user?: HotUser
+}
 
 const navMainItems = [
   {
@@ -60,9 +65,9 @@ const navMainItems = [
   },
 ]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...rest }: AppSidebarProps) {
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="inset" {...rest}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -84,7 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMainItems} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

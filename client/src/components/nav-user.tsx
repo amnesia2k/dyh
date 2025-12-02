@@ -2,6 +2,7 @@ import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
+import type { HotUser } from '@/hooks/auth-store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -19,11 +20,17 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/hooks/auth-store'
 
-export function NavUser() {
+type NavUserProps = {
+  user?: HotUser
+}
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
-  const hot = useAuthStore((state) => state.user)
   const clearAuth = useAuthStore((state) => state.clearAuth)
+  const storeUser = useAuthStore((state) => state.user)
+
+  const hot = user ?? storeUser
 
   if (!hot) {
     return null

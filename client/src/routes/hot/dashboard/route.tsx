@@ -1,4 +1,5 @@
 import {
+  Link,
   Outlet,
   createFileRoute,
   redirect,
@@ -93,8 +94,8 @@ function RouteComponent() {
     <SidebarProvider>
       <AppSidebar user={user} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-5">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
+          <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -131,6 +132,12 @@ function RouteComponent() {
                 })}
               </BreadcrumbList>
             </Breadcrumb>
+          </div>
+
+          <div className="whitespace-nowrap">
+            <Link to="/" className="text-sm underline">
+              Go to website
+            </Link>
           </div>
         </header>
 

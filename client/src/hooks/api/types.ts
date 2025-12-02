@@ -154,7 +154,7 @@ export type ActivityLog = {
   action: string
   type: 'NEW' | 'UPDATED' | 'DELETED'
   message?: string
-  meta?: unknown
+  meta?: { [key: string]: any }
   createdAt?: string
   updatedAt?: string
 }

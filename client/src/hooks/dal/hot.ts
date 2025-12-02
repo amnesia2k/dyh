@@ -46,18 +46,22 @@ export function useHotsQuery(
   return useQuery(hotsQueryOptions(options))
 }
 
+export function hotQueryOptions(id: string, options?: HotQueryOptions) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['hot', id] as HotQueryKey,
+    queryFn: () => fetchHotById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
 export function useHotQuery(
   id: string,
   options?: HotQueryOptions,
 ): UseQueryResult<HotUser, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['hot', id],
-    queryFn: () => fetchHotById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(hotQueryOptions(id, options))
 }
 
 export function useUpdateHotMutation(

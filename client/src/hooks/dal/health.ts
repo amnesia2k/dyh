@@ -10,17 +10,21 @@ type HealthQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function useHealthQuery(
-  options?: HealthQueryOptions,
-): UseQueryResult<HealthCheck, Error> {
+export function healthQueryOptions(options?: HealthQueryOptions) {
   const { staleTime, ...rest } = options ?? {}
 
-  return useQuery({
-    queryKey: ['health'],
+  return {
+    queryKey: ['health'] as HealthQueryKey,
     queryFn: fetchHealth,
     staleTime: staleTime ?? SHORT_STALE_TIME,
     ...rest,
-  })
+  }
+}
+
+export function useHealthQuery(
+  options?: HealthQueryOptions,
+): UseQueryResult<HealthCheck, Error> {
+  return useQuery(healthQueryOptions(options))
 }
 
 export type { HealthCheck } from '../api/types'

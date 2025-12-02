@@ -34,33 +34,43 @@ type SermonQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
+export function sermonsQueryOptions(
+  filters?: SermonFilters,
+  options?: SermonsQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['sermons', filters] as SermonsQueryKey,
+    queryFn: () => fetchSermons(filters),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function sermonQueryOptions(id: string, options?: SermonQueryOptions) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['sermons', id] as SermonQueryKey,
+    queryFn: () => fetchSermonById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
 export function useSermonsQuery(
   filters?: SermonFilters,
   options?: SermonsQueryOptions,
 ): UseQueryResult<SermonsResult, Error> {
-  const queryKey: SermonsQueryKey = ['sermons', filters]
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey,
-    queryFn: () => fetchSermons(filters),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(sermonsQueryOptions(filters, options))
 }
 
 export function useSermonQuery(
   id: string,
   options?: SermonQueryOptions,
 ): UseQueryResult<Sermon, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['sermons', id],
-    queryFn: () => fetchSermonById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(sermonQueryOptions(id, options))
 }
 
 export function useCreateSermonMutation(

@@ -38,31 +38,42 @@ type TestimonyQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function useTestimoniesQuery(
-  options?: TestimoniesQueryOptions,
-): UseQueryResult<TestimoniesResult, Error> {
+export function testimoniesQueryOptions(options?: TestimoniesQueryOptions) {
   const { staleTime, ...rest } = options ?? {}
 
-  return useQuery({
-    queryKey: ['testimonies'],
+  return {
+    queryKey: ['testimonies'] as TestimoniesQueryKey,
     queryFn: fetchTestimonies,
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
-  })
+  }
+}
+
+export function testimonyQueryOptions(
+  id: string,
+  options?: TestimonyQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['testimonies', id] as TestimonyQueryKey,
+    queryFn: () => fetchTestimonyById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function useTestimoniesQuery(
+  options?: TestimoniesQueryOptions,
+): UseQueryResult<TestimoniesResult, Error> {
+  return useQuery(testimoniesQueryOptions(options))
 }
 
 export function useTestimonyQuery(
   id: string,
   options?: TestimonyQueryOptions,
 ): UseQueryResult<Testimony, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['testimonies', id],
-    queryFn: () => fetchTestimonyById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(testimonyQueryOptions(id, options))
 }
 
 export function useCreateTestimonyMutation(

@@ -34,33 +34,43 @@ type EventQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
+export function eventsQueryOptions(
+  filters?: EventFilters,
+  options?: EventsQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['events', filters] as EventsQueryKey,
+    queryFn: () => fetchEvents(filters),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function eventQueryOptions(id: string, options?: EventQueryOptions) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['events', id] as EventQueryKey,
+    queryFn: () => fetchEventById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
 export function useEventsQuery(
   filters?: EventFilters,
   options?: EventsQueryOptions,
 ): UseQueryResult<EventsListResult, Error> {
-  const queryKey: EventsQueryKey = ['events', filters]
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey,
-    queryFn: () => fetchEvents(filters),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(eventsQueryOptions(filters, options))
 }
 
 export function useEventQuery(
   id: string,
   options?: EventQueryOptions,
 ): UseQueryResult<Event, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['events', id],
-    queryFn: () => fetchEventById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(eventQueryOptions(id, options))
 }
 
 export function useCreateEventMutation(

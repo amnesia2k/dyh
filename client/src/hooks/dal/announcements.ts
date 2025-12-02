@@ -39,33 +39,46 @@ type AnnouncementQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
+export function announcementsQueryOptions(
+  filters?: AnnouncementFilters,
+  options?: AnnouncementsQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['announcements', filters] as AnnouncementsQueryKey,
+    queryFn: () => fetchAnnouncements(filters),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function announcementQueryOptions(
+  id: string,
+  options?: AnnouncementQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['announcements', id] as AnnouncementQueryKey,
+    queryFn: () => fetchAnnouncementById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
 export function useAnnouncementsQuery(
   filters?: AnnouncementFilters,
   options?: AnnouncementsQueryOptions,
 ): UseQueryResult<AnnouncementsResult, Error> {
-  const queryKey: AnnouncementsQueryKey = ['announcements', filters]
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey,
-    queryFn: () => fetchAnnouncements(filters),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(announcementsQueryOptions(filters, options))
 }
 
 export function useAnnouncementQuery(
   id: string,
   options?: AnnouncementQueryOptions,
 ): UseQueryResult<Announcement, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['announcements', id],
-    queryFn: () => fetchAnnouncementById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(announcementQueryOptions(id, options))
 }
 
 export function useCreateAnnouncementMutation(

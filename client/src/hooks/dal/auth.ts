@@ -23,6 +23,17 @@ type MeQueryOptions = Omit<
   onError?: (error: Error) => void
 }
 
+export function meQueryOptions(options?: MeQueryOptions) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['auth', 'me'] as MeQueryKey,
+    queryFn: fetchMe,
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
 export function useLoginMutation(
   options?: UseMutationOptions<AuthenticatedHot, Error, LoginPayload>,
 ): UseMutationResult<AuthenticatedHot, Error, LoginPayload> {
@@ -60,14 +71,7 @@ export function useRegisterMutation(
 export function useMeQuery(
   options?: MeQueryOptions,
 ): UseQueryResult<HotUser, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: fetchMe,
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(meQueryOptions(options))
 }
 
 export function useLogoutMutation(

@@ -33,31 +33,39 @@ type MemberQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function useMembersQuery(
-  options?: MembersQueryOptions,
-): UseQueryResult<MembersListResult, Error> {
+export function membersQueryOptions(options?: MembersQueryOptions) {
   const { staleTime, ...rest } = options ?? {}
 
-  return useQuery({
-    queryKey: ['members'],
+  return {
+    queryKey: ['members'] as MembersQueryKey,
     queryFn: fetchMembers,
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
-  })
+  }
+}
+
+export function memberQueryOptions(id: string, options?: MemberQueryOptions) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['members', id] as MemberQueryKey,
+    queryFn: () => fetchMemberById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function useMembersQuery(
+  options?: MembersQueryOptions,
+): UseQueryResult<MembersListResult, Error> {
+  return useQuery(membersQueryOptions(options))
 }
 
 export function useMemberQuery(
   id: string,
   options?: MemberQueryOptions,
 ): UseQueryResult<Member, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['members', id],
-    queryFn: () => fetchMemberById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(memberQueryOptions(id, options))
 }
 
 export function useCreateMemberMutation(

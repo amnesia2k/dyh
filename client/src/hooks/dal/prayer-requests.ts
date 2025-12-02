@@ -40,31 +40,44 @@ type PrayerRequestQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function usePrayerRequestsQuery(
+export function prayerRequestsQueryOptions(
   options?: PrayerRequestsQueryOptions,
-): UseQueryResult<PrayerRequestsResult, Error> {
+) {
   const { staleTime, ...rest } = options ?? {}
 
-  return useQuery({
-    queryKey: ['prayer-requests'],
+  return {
+    queryKey: ['prayer-requests'] as PrayerRequestsQueryKey,
     queryFn: fetchPrayerRequests,
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
-  })
+  }
+}
+
+export function prayerRequestQueryOptions(
+  id: string,
+  options?: PrayerRequestQueryOptions,
+) {
+  const { staleTime, ...rest } = options ?? {}
+
+  return {
+    queryKey: ['prayer-requests', id] as PrayerRequestQueryKey,
+    queryFn: () => fetchPrayerRequestById(id),
+    staleTime: staleTime ?? DEFAULT_STALE_TIME,
+    ...rest,
+  }
+}
+
+export function usePrayerRequestsQuery(
+  options?: PrayerRequestsQueryOptions,
+): UseQueryResult<PrayerRequestsResult, Error> {
+  return useQuery(prayerRequestsQueryOptions(options))
 }
 
 export function usePrayerRequestQuery(
   id: string,
   options?: PrayerRequestQueryOptions,
 ): UseQueryResult<PrayerRequest, Error> {
-  const { staleTime, ...rest } = options ?? {}
-
-  return useQuery({
-    queryKey: ['prayer-requests', id],
-    queryFn: () => fetchPrayerRequestById(id),
-    staleTime: staleTime ?? DEFAULT_STALE_TIME,
-    ...rest,
-  })
+  return useQuery(prayerRequestQueryOptions(id, options))
 }
 
 export function useCreatePrayerRequestMutation(

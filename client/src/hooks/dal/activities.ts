@@ -15,17 +15,21 @@ type ActivitiesQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function useActivitiesQuery(
-  options?: ActivitiesQueryOptions,
-): UseQueryResult<Array<ActivityLog>, Error> {
+export function activitiesQueryOptions(options?: ActivitiesQueryOptions) {
   const { staleTime, ...rest } = options ?? {}
 
-  return useQuery({
-    queryKey: ['activities'],
+  return {
+    queryKey: ['activities'] as ActivitiesQueryKey,
     queryFn: fetchActivities,
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
-  })
+  }
+}
+
+export function useActivitiesQuery(
+  options?: ActivitiesQueryOptions,
+): UseQueryResult<Array<ActivityLog>, Error> {
+  return useQuery(activitiesQueryOptions(options))
 }
 
 export type { ActivityLog } from '../api/types'

@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type { CreateSermonPayload, Sermon, UpdateSermonPayload } from './types'
 
@@ -10,7 +10,7 @@ export type SermonFilters = {
 export async function fetchSermons(filters?: SermonFilters) {
   try {
     const response = await api.get<ApiListResponse<Array<Sermon>>>('/sermon', {
-      params: filters,
+      params: buildSearchParams(filters),
     })
     const sermons = response.data.data ?? []
     const count =

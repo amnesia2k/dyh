@@ -7,6 +7,7 @@ import {
   updateTestimony,
 } from '../api/testimonies'
 import { DEFAULT_STALE_TIME } from './query-defaults'
+import type { TestimonyFilters } from '../api/testimonies'
 import type {
   UseMutationOptions,
   UseMutationResult,
@@ -20,7 +21,7 @@ import type {
 } from '../api/types'
 
 type TestimoniesResult = { testimonies: Array<Testimony>; count: number }
-type TestimoniesQueryKey = ['testimonies']
+type TestimoniesQueryKey = ['testimonies', TestimonyFilters | undefined]
 type TestimonyQueryKey = ['testimonies', string]
 
 type TestimoniesQueryOptions = Omit<
@@ -38,12 +39,15 @@ type TestimonyQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function testimoniesQueryOptions(options?: TestimoniesQueryOptions) {
+export function testimoniesQueryOptions(
+  filters?: TestimonyFilters,
+  options?: TestimoniesQueryOptions,
+) {
   const { staleTime, ...rest } = options ?? {}
 
   return {
-    queryKey: ['testimonies'] as TestimoniesQueryKey,
-    queryFn: fetchTestimonies,
+    queryKey: ['testimonies', filters] as TestimoniesQueryKey,
+    queryFn: () => fetchTestimonies(filters),
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
   }
@@ -64,9 +68,10 @@ export function testimonyQueryOptions(
 }
 
 export function useTestimoniesQuery(
+  filters?: TestimonyFilters,
   options?: TestimoniesQueryOptions,
 ): UseQueryResult<TestimoniesResult, Error> {
-  return useQuery(testimoniesQueryOptions(options))
+  return useQuery(testimoniesQueryOptions(filters, options))
 }
 
 export function useTestimonyQuery(

@@ -6,6 +6,7 @@ import {
   updatePrayerRequest,
 } from '../api/prayer-requests'
 import { DEFAULT_STALE_TIME } from './query-defaults'
+import type { PrayerRequestFilters } from '../api/prayer-requests'
 import type {
   UseMutationOptions,
   UseMutationResult,
@@ -22,7 +23,10 @@ type PrayerRequestsResult = {
   prayerRequests: Array<PrayerRequest>
   count: number
 }
-type PrayerRequestsQueryKey = ['prayer-requests']
+type PrayerRequestsQueryKey = [
+  'prayer-requests',
+  PrayerRequestFilters | undefined,
+]
 type PrayerRequestQueryKey = ['prayer-requests', string]
 
 type PrayerRequestsQueryOptions = Omit<
@@ -41,13 +45,14 @@ type PrayerRequestQueryOptions = Omit<
 >
 
 export function prayerRequestsQueryOptions(
+  filters?: PrayerRequestFilters,
   options?: PrayerRequestsQueryOptions,
 ) {
   const { staleTime, ...rest } = options ?? {}
 
   return {
-    queryKey: ['prayer-requests'] as PrayerRequestsQueryKey,
-    queryFn: fetchPrayerRequests,
+    queryKey: ['prayer-requests', filters] as PrayerRequestsQueryKey,
+    queryFn: () => fetchPrayerRequests(filters),
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
   }
@@ -68,9 +73,10 @@ export function prayerRequestQueryOptions(
 }
 
 export function usePrayerRequestsQuery(
+  filters?: PrayerRequestFilters,
   options?: PrayerRequestsQueryOptions,
 ): UseQueryResult<PrayerRequestsResult, Error> {
-  return useQuery(prayerRequestsQueryOptions(options))
+  return useQuery(prayerRequestsQueryOptions(filters, options))
 }
 
 export function usePrayerRequestQuery(

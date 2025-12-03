@@ -1,11 +1,17 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type { CreateMemberPayload, Member, UpdateMemberPayload } from './types'
 
-export async function fetchMembers() {
+export type MemberFilters = {
+  search?: string
+}
+
+export async function fetchMembers(filters?: MemberFilters) {
   try {
-    const response = await api.get<ApiListResponse<Array<Member>>>('/member')
+    const response = await api.get<ApiListResponse<Array<Member>>>('/member', {
+      params: buildSearchParams(filters),
+    })
     const members = response.data.data ?? []
     const count =
       typeof response.data.count === 'number'

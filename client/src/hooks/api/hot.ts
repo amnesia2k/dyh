@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { HotUser } from '../auth-store'
 import type { ApiResponse } from './common'
 
@@ -13,9 +13,15 @@ export type UpdateHotPayload = Partial<{
   phone: string
 }>
 
-export async function fetchHots() {
+export type HotFilters = {
+  search?: string
+}
+
+export async function fetchHots(filters?: HotFilters) {
   try {
-    const response = await api.get<ApiResponse<Array<HotUser>>>('/hot')
+    const response = await api.get<ApiResponse<Array<HotUser>>>('/hot', {
+      params: buildSearchParams(filters),
+    })
 
     return response.data.data ?? []
   } catch (error) {

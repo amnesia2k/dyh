@@ -5,5 +5,9 @@ export const Route = createFileRoute('/(jg)')({
 })
 
 function RouteComponent() {
-  return <Outlet />
+  return (
+    <main>
+      <Outlet />
+    </main>
+  )
 }

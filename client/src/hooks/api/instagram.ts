@@ -1,12 +1,18 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiResponse } from './common'
 import type { CreateInstagramPostPayload, InstagramPost } from './types'
 
-export async function fetchInstagramPosts() {
+export type InstagramFilters = {
+  search?: string
+}
+
+export async function fetchInstagramPosts(filters?: InstagramFilters) {
   try {
-    const response =
-      await api.get<ApiResponse<Array<InstagramPost>>>('/instagram')
+    const response = await api.get<ApiResponse<Array<InstagramPost>>>(
+      '/instagram',
+      { params: buildSearchParams(filters) },
+    )
 
     return response.data.data ?? []
   } catch (error) {

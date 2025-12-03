@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type {
   CreatePrayerRequestPayload,
@@ -7,10 +7,16 @@ import type {
   UpdatePrayerRequestPayload,
 } from './types'
 
-export async function fetchPrayerRequests() {
+export type PrayerRequestFilters = {
+  search?: string
+}
+
+export async function fetchPrayerRequests(filters?: PrayerRequestFilters) {
   try {
-    const response =
-      await api.get<ApiListResponse<Array<PrayerRequest>>>('/prayer-request')
+    const response = await api.get<ApiListResponse<Array<PrayerRequest>>>(
+      '/prayer-request',
+      { params: buildSearchParams(filters) },
+    )
     const prayerRequests = response.data.data ?? []
     const count =
       typeof response.data.count === 'number'

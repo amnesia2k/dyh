@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type {
   CreateTestimonyPayload,
@@ -7,10 +7,16 @@ import type {
   UpdateTestimonyPayload,
 } from './types'
 
-export async function fetchTestimonies() {
+export type TestimonyFilters = {
+  search?: string
+}
+
+export async function fetchTestimonies(filters?: TestimonyFilters) {
   try {
-    const response =
-      await api.get<ApiListResponse<Array<Testimony>>>('/testimony')
+    const response = await api.get<ApiListResponse<Array<Testimony>>>(
+      '/testimony',
+      { params: buildSearchParams(filters) },
+    )
     const testimonies = response.data.data ?? []
     const count =
       typeof response.data.count === 'number'

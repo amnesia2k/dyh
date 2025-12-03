@@ -35,3 +35,9 @@ export function formatApiError(error: unknown) {
 
   return new Error('Something went wrong. Please try again.')
 }
+
+export function buildSearchParams(filters?: { search?: string }) {
+  const search =
+    typeof filters?.search === 'string' ? filters.search.trim() : undefined
+  return search ? { search } : undefined
+}

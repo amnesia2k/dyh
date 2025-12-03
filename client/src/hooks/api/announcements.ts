@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type {
   Announcement,
@@ -15,7 +15,7 @@ export async function fetchAnnouncements(filters?: AnnouncementFilters) {
   try {
     const response = await api.get<ApiListResponse<Array<Announcement>>>(
       '/announcement',
-      { params: filters },
+      { params: buildSearchParams(filters) },
     )
     const announcements = response.data.data ?? []
     const count =

@@ -14,9 +14,9 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query'
 import type { HotUser } from '../auth-store'
-import type { UpdateHotPayload } from '../api/hot'
+import type { HotFilters, UpdateHotPayload } from '../api/hot'
 
-type HotsQueryKey = ['hot', 'list']
+type HotsQueryKey = ['hot', 'list', HotFilters | undefined]
 type HotQueryKey = ['hot', string]
 
 type HotsQueryOptions = Omit<
@@ -29,21 +29,25 @@ type HotQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function hotsQueryOptions(options?: HotsQueryOptions) {
+export function hotsQueryOptions(
+  filters?: HotFilters,
+  options?: HotsQueryOptions,
+) {
   const { staleTime, ...rest } = options ?? {}
 
   return {
-    queryKey: ['hot', 'list'] as HotsQueryKey,
-    queryFn: fetchHots,
+    queryKey: ['hot', 'list', filters] as HotsQueryKey,
+    queryFn: () => fetchHots(filters),
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
   }
 }
 
 export function useHotsQuery(
+  filters?: HotFilters,
   options?: HotsQueryOptions,
 ): UseQueryResult<Array<HotUser>, Error> {
-  return useQuery(hotsQueryOptions(options))
+  return useQuery(hotsQueryOptions(filters, options))
 }
 
 export function hotQueryOptions(id: string, options?: HotQueryOptions) {

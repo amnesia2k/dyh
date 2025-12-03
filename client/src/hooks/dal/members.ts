@@ -7,6 +7,7 @@ import {
   updateMember,
 } from '../api/members'
 import { DEFAULT_STALE_TIME } from './query-defaults'
+import type { MemberFilters } from '../api/members'
 import type {
   UseMutationOptions,
   UseMutationResult,
@@ -20,7 +21,7 @@ import type {
 } from '../api/types'
 
 type MembersListResult = { members: Array<Member>; count: number }
-type MembersQueryKey = ['members']
+type MembersQueryKey = ['members', MemberFilters | undefined]
 type MemberQueryKey = ['members', string]
 
 type MembersQueryOptions = Omit<
@@ -33,12 +34,15 @@ type MemberQueryOptions = Omit<
   'queryKey' | 'queryFn'
 >
 
-export function membersQueryOptions(options?: MembersQueryOptions) {
+export function membersQueryOptions(
+  filters?: MemberFilters,
+  options?: MembersQueryOptions,
+) {
   const { staleTime, ...rest } = options ?? {}
 
   return {
-    queryKey: ['members'] as MembersQueryKey,
-    queryFn: fetchMembers,
+    queryKey: ['members', filters] as MembersQueryKey,
+    queryFn: () => fetchMembers(filters),
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
   }
@@ -56,9 +60,10 @@ export function memberQueryOptions(id: string, options?: MemberQueryOptions) {
 }
 
 export function useMembersQuery(
+  filters?: MemberFilters,
   options?: MembersQueryOptions,
 ): UseQueryResult<MembersListResult, Error> {
-  return useQuery(membersQueryOptions(options))
+  return useQuery(membersQueryOptions(filters, options))
 }
 
 export function useMemberQuery(

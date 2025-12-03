@@ -1,5 +1,5 @@
 import { api } from '../api-client'
-import { formatApiError, unwrapData } from './common'
+import { buildSearchParams, formatApiError, unwrapData } from './common'
 import type { ApiListResponse, ApiResponse } from './common'
 import type { CreateEventPayload, Event, UpdateEventPayload } from './types'
 
@@ -10,7 +10,7 @@ export type EventFilters = {
 export async function fetchEvents(filters?: EventFilters) {
   try {
     const response = await api.get<ApiListResponse<Array<Event>>>('/event', {
-      params: filters,
+      params: buildSearchParams(filters),
     })
     const events = response.data.data ?? []
     const count =

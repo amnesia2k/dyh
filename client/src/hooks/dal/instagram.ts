@@ -6,6 +6,7 @@ import {
   fetchInstagramPosts,
 } from '../api/instagram'
 import { DEFAULT_STALE_TIME } from './query-defaults'
+import type { InstagramFilters } from '../api/instagram'
 import type {
   QueryClient,
   UseMutationOptions,
@@ -15,7 +16,7 @@ import type {
 } from '@tanstack/react-query'
 import type { CreateInstagramPostPayload, InstagramPost } from '../api/types'
 
-type InstagramPostsQueryKey = ['instagram-posts']
+type InstagramPostsQueryKey = ['instagram-posts', InstagramFilters | undefined]
 
 type InstagramPostsQueryOptions = Omit<
   UseQueryOptions<
@@ -28,22 +29,24 @@ type InstagramPostsQueryOptions = Omit<
 >
 
 export function instagramPostsQueryOptions(
+  filters?: InstagramFilters,
   options?: InstagramPostsQueryOptions,
 ) {
   const { staleTime, ...rest } = options ?? {}
 
   return {
-    queryKey: ['instagram-posts'] as InstagramPostsQueryKey,
-    queryFn: fetchInstagramPosts,
+    queryKey: ['instagram-posts', filters] as InstagramPostsQueryKey,
+    queryFn: () => fetchInstagramPosts(filters),
     staleTime: staleTime ?? DEFAULT_STALE_TIME,
     ...rest,
   }
 }
 
 export function useInstagramPostsQuery(
+  filters?: InstagramFilters,
   options?: InstagramPostsQueryOptions,
 ): UseQueryResult<Array<InstagramPost>, Error> {
-  return useQuery(instagramPostsQueryOptions(options))
+  return useQuery(instagramPostsQueryOptions(filters, options))
 }
 
 export function useCreateInstagramPostMutation(
@@ -84,13 +87,20 @@ export function useDeleteInstagramPostMutation(
   })
 }
 
-export async function ensureInstagramPosts(queryClient: QueryClient) {
+export async function ensureInstagramPosts(
+  queryClient: QueryClient,
+  search?: string,
+) {
+  const filters = search ? { search } : undefined
+
   try {
-    return await queryClient.ensureQueryData(instagramPostsQueryOptions())
+    return await queryClient.ensureQueryData(
+      instagramPostsQueryOptions(filters),
+    )
   } catch (error) {
     console.error('Failed to load Instagram posts', error)
     const fallback: Array<InstagramPost> = []
-    queryClient.setQueryData(['instagram-posts'], fallback)
+    queryClient.setQueryData(['instagram-posts', filters], fallback)
     return fallback
   }
 }

@@ -1,4 +1,5 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+import { useState } from 'react'
 import { HandHeart, Mic2, Sparkles, Users } from 'lucide-react'
 
 import {
@@ -8,7 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { activitiesQueryOptions } from '@/hooks/dal/activities'
+import { Input } from '@/components/ui/input'
+import {
+  activitiesQueryOptions,
+  useActivitiesQuery,
+} from '@/hooks/dal/activities'
 import { eventsQueryOptions } from '@/hooks/dal/events'
 import { membersQueryOptions } from '@/hooks/dal/members'
 import { prayerRequestsQueryOptions } from '@/hooks/dal/prayer-requests'
@@ -17,6 +22,7 @@ import { testimoniesQueryOptions } from '@/hooks/dal/testimonies'
 import { EventItem } from '@/components/event-item'
 import { StatCard } from '@/components/stat-card'
 import { ActivityItem } from '@/components/activity-item'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 
 const ACTIVITY_LIMIT = 8
 const EVENT_LIMIT = 5
@@ -26,7 +32,7 @@ export const Route = createFileRoute('/hot/dashboard/')({
     const [activities, members, prayerRequests, testimonies, sermons, events] =
       await Promise.all([
         queryClient.ensureQueryData(
-          activitiesQueryOptions({ staleTime: 2 * 60 * 1000 }),
+          activitiesQueryOptions(undefined, { staleTime: 2 * 60 * 1000 }),
         ),
         queryClient.ensureQueryData(membersQueryOptions()),
         queryClient.ensureQueryData(prayerRequestsQueryOptions()),
@@ -52,6 +58,16 @@ export const Route = createFileRoute('/hot/dashboard/')({
 function RouteComponent() {
   const { activities, metrics, upcomingEvents } = useLoaderData({
     from: Route.id,
+  })
+  const [activitySearch, setActivitySearch] = useState('')
+  const debouncedActivitySearch = useDebouncedValue(activitySearch, 300)
+  const normalizedActivitySearch = debouncedActivitySearch.trim()
+  const activityFilters = normalizedActivitySearch
+    ? { search: normalizedActivitySearch }
+    : undefined
+  const { data: activityList = [] } = useActivitiesQuery(activityFilters, {
+    initialData: activityFilters ? undefined : activities,
+    staleTime: 2 * 60 * 1000,
   })
 
   return (
@@ -97,12 +113,24 @@ function RouteComponent() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="rounded-2xl border-border/70 bg-card/90 shadow-[0_10px_40px_rgba(0,0,0,0.05)] lg:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Recent Activity</CardTitle>
-            <CardDescription>Latest updates from the community</CardDescription>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-xl">Recent Activity</CardTitle>
+                <CardDescription>
+                  Latest updates from the community
+                </CardDescription>
+              </div>
+              <Input
+                value={activitySearch}
+                onChange={(event) => setActivitySearch(event.target.value)}
+                placeholder="Search activity..."
+                className="h-9 sm:max-w-xs"
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {activities.length ? (
-              activities
+            {activityList.length ? (
+              activityList
                 .slice(0, ACTIVITY_LIMIT)
                 .map((activity, idx) => (
                   <ActivityItem key={activity._id || idx} activity={activity} />

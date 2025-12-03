@@ -1,15 +1,6 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import {
-  CalendarDays,
-  HandHeart,
-  History,
-  Mic2,
-  Sparkles,
-  Users,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { HandHeart, Mic2, Sparkles, Users } from 'lucide-react'
 
-import type { ActivityLog, Event } from '@/hooks/api/types'
 import {
   Card,
   CardContent,
@@ -17,13 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import { activitiesQueryOptions } from '@/hooks/dal/activities'
 import { eventsQueryOptions } from '@/hooks/dal/events'
 import { membersQueryOptions } from '@/hooks/dal/members'
 import { prayerRequestsQueryOptions } from '@/hooks/dal/prayer-requests'
 import { sermonsQueryOptions } from '@/hooks/dal/sermons'
 import { testimoniesQueryOptions } from '@/hooks/dal/testimonies'
+import { EventItem } from '@/components/event-item'
+import { StatCard } from '@/components/stat-card'
+import { ActivityItem } from '@/components/activity-item'
 
 const ACTIVITY_LIMIT = 8
 const EVENT_LIMIT = 5
@@ -46,10 +39,9 @@ export const Route = createFileRoute('/hot/dashboard/')({
       activities,
       metrics: {
         members: members.count,
-        prayerRequests:
-          prayerRequests.count ?? prayerRequests.prayerRequests.length,
-        testimonies: testimonies.count ?? testimonies.testimonies.length,
-        sermons: sermons.count ?? sermons.sermons.length,
+        prayerRequests: prayerRequests.count,
+        testimonies: testimonies.count,
+        sermons: sermons.count,
       },
       upcomingEvents: events.events.slice(0, EVENT_LIMIT),
     }
@@ -112,11 +104,8 @@ function RouteComponent() {
             {activities.length ? (
               activities
                 .slice(0, ACTIVITY_LIMIT)
-                .map((activity, index) => (
-                  <ActivityItem
-                    key={activity._id ?? `${activity.action}-${index}`}
-                    activity={activity}
-                  />
+                .map((activity, idx) => (
+                  <ActivityItem key={activity._id || idx} activity={activity} />
                 ))
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -148,140 +137,4 @@ function RouteComponent() {
       </div>
     </div>
   )
-}
-
-type StatCardProps = {
-  icon: LucideIcon
-  label: string
-  value: number
-  subtext?: string
-  badgeClass: string
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  subtext = '—',
-  badgeClass,
-}: StatCardProps) {
-  return (
-    <Card className="rounded-2xl border-border/60 bg-card/90 shadow-[0_10px_40px_rgba(0,0,0,0.05)]">
-      <CardHeader className="flex flex-row items-start justify-between space-y-0">
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <div className="text-4xl font-semibold tabular-nums">{value}</div>
-          </div>
-          <p className="text-xs text-muted-foreground">{subtext}</p>
-        </div>
-        <div
-          className={cn(
-            'mt-1 flex h-11 w-11 items-center justify-center rounded-full',
-            badgeClass,
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-      </CardHeader>
-    </Card>
-  )
-}
-
-function ActivityItem({ activity }: { activity: ActivityLog }) {
-  const badgeClass = {
-    NEW: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-100',
-    UPDATED:
-      'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-50',
-    DELETED: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-50',
-  }[activity.type]
-
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/70 px-3 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-      <span className="mt-1 inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
-      <div className="flex-1 space-y-1">
-        <p className="font-medium leading-tight">
-          {activity.message ?? formatAction(activity.action)}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {formatRelativeTime(activity.createdAt)}
-        </p>
-      </div>
-      <div
-        className={cn(
-          'rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-tight',
-          badgeClass,
-        )}
-      >
-        {activity.type}
-      </div>
-    </div>
-  )
-}
-
-function EventItem({ event }: { event: Event }) {
-  const date = event.date ? new Date(event.date) : null
-
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/70 p-3 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/15 text-secondary">
-        <CalendarDays className="h-5 w-5" />
-      </div>
-      <div className="flex-1 space-y-1">
-        <p className="font-semibold leading-tight text-foreground">
-          {event.title}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {formatEventDateTime(date)}
-          {event.location ? ` • ${event.location}` : ''}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function formatAction(action: string) {
-  return action
-    .toLowerCase()
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-function formatRelativeTime(dateString?: string) {
-  if (!dateString) return '—'
-  const date = new Date(dateString)
-  if (Number.isNaN(date.getTime())) return '—'
-
-  const diff = Date.now() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-
-  if (minutes < 1) return 'just now'
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days < 7) return `${days}d ago`
-
-  return formatFullDate(date)
-}
-
-function formatFullDate(date: Date | null) {
-  if (!date || Number.isNaN(date.getTime())) return 'TBD'
-  return new Intl.DateTimeFormat('en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date)
-}
-
-function formatEventDateTime(date: Date | null) {
-  if (!date || Number.isNaN(date.getTime())) return 'Date to be announced'
-
-  const datePart = formatFullDate(date)
-  const timePart = new Intl.DateTimeFormat('en', {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date)
-
-  return `${datePart} at ${timePart}`
 }

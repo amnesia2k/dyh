@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { InstagramPost } from "../db/models/instagram-post.model.js";
 import { logger } from "../utils/logger.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 const INSTAGRAM_HOST = "www.instagram.com";
@@ -53,9 +54,10 @@ export const createInstagramPost = async (req, res) => {
   }
 };
 
-export const getInstagramPosts = async (_req, res) => {
+export const getInstagramPosts = async (req, res) => {
   try {
-    const posts = await InstagramPost.find().sort({ createdAt: -1 });
+    const searchFilter = buildSearchFilter(req.query, ["url"]);
+    const posts = await InstagramPost.find(searchFilter ?? {}).sort({ createdAt: -1 });
     return response(res, 200, "Instagram posts fetched successfully", posts);
   } catch (error) {
     logger.error("Failed to fetch Instagram posts:", error);

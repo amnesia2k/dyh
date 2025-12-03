@@ -1,6 +1,7 @@
 import { Testimony } from "../db/models/testimony.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 export const createTestimony = async (req, res) => {
@@ -30,10 +31,13 @@ export const createTestimony = async (req, res) => {
   }
 };
 
-export const getTestimonies = async (_req, res) => {
+export const getTestimonies = async (req, res) => {
   try {
-    const testimonies = await Testimony.find().sort({ createdAt: -1 });
-    const count = await Testimony.countDocuments();
+    const searchFilter = buildSearchFilter(req.query, ["fullName", "email", "message", "status"]);
+    const query = searchFilter ?? {};
+
+    const testimonies = await Testimony.find(query).sort({ createdAt: -1 });
+    const count = await Testimony.countDocuments(query);
 
     logger.info(`Total Testimonies: ${count}`);
 

@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
 import type { FormHTMLAttributes } from 'react'
 
 import { cn } from '@/lib/utils'
+import { FormInput } from '@/components/input'
 import { Button } from '@/components/ui/button'
 import {
   Field,
@@ -11,7 +11,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -48,8 +47,6 @@ export function SignupForm({
   ...formProps
 }: SignupFormProps) {
   const isDisabled = isSubmitting || isUploading
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [selectedTribe, setSelectedTribe] = useState('')
 
   return (
@@ -64,29 +61,25 @@ export function SignupForm({
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="name">Full Name</FieldLabel>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="John Doe"
-              disabled={isDisabled}
-              required
-            />
-          </Field>
+          <FormInput
+            label="Full Name"
+            id="name"
+            name="name"
+            type="text"
+            placeholder="John Doe"
+            disabled={isDisabled}
+            required
+          />
 
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="m@example.com"
-              disabled={isDisabled}
-              required
-            />
-          </Field>
+          <FormInput
+            label="Email"
+            id="email"
+            name="email"
+            type="email"
+            placeholder="m@example.com"
+            disabled={isDisabled}
+            required
+          />
 
           <Field>
             <FieldLabel htmlFor="tribe">Tribe</FieldLabel>
@@ -110,116 +103,67 @@ export function SignupForm({
             </Select>
           </Field>
 
-          <Field>
-            <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              placeholder="+234..."
-              disabled={isDisabled}
-              required
-            />
-          </Field>
+          <FormInput
+            label="Phone Number"
+            id="phone"
+            name="phone"
+            type="tel"
+            placeholder="+234..."
+            disabled={isDisabled}
+            required
+          />
 
-          <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <div className="relative">
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                disabled={isDisabled}
-                required
-              />
-              <button
-                type="button"
-                aria-pressed={showPassword}
-                onClick={() => setShowPassword((prev) => !prev)}
-                disabled={isDisabled}
-                className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-2 flex items-center disabled:opacity-50"
-              >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-                <span className="sr-only">
-                  {showPassword ? 'Hide password' : 'Show password'}
-                </span>
-              </button>
-            </div>
-            <FieldDescription>
-              Must be at least 8 characters long.
-            </FieldDescription>
-          </Field>
+          <FormInput
+            label="Password"
+            id="password"
+            name="password"
+            type="password"
+            disabled={isDisabled}
+            required
+            enablePasswordToggle
+            description="Must be at least 8 characters long."
+          />
 
-          <Field>
-            <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
-            <div className="relative">
-              <Input
-                id="confirm-password"
-                name="confirm-password"
-                type={showConfirmPassword ? 'text' : 'password'}
-                disabled={isDisabled}
-                required
-              />
-              <button
-                type="button"
-                aria-pressed={showConfirmPassword}
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                disabled={isDisabled}
-                className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-2 flex items-center disabled:opacity-50"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-                <span className="sr-only">
-                  {showConfirmPassword ? 'Hide password' : 'Show password'}
-                </span>
-              </button>
-            </div>
-            <FieldDescription>Please confirm your password.</FieldDescription>
-          </Field>
+          <FormInput
+            label="Confirm Password"
+            id="confirm-password"
+            name="confirm-password"
+            type="password"
+            disabled={isDisabled}
+            required
+            enablePasswordToggle
+            description="Please confirm your password."
+          />
 
-          <Field className="lg:col-span-2">
-            <FieldLabel htmlFor="bio">Bio</FieldLabel>
-            <Input
-              id="bio"
-              name="bio"
-              type="text"
-              placeholder="Tell us about yourself"
-              disabled={isDisabled}
-            />
-          </Field>
+          <FormInput
+            label="Bio"
+            id="bio"
+            name="bio"
+            type="text"
+            placeholder="Tell us about yourself"
+            disabled={isDisabled}
+            fieldProps={{ className: 'lg:col-span-2' }}
+          />
 
-          <Field className="lg:col-span-2">
-            <FieldLabel htmlFor="image">Profile Image</FieldLabel>
-            <Input
-              id="image"
-              name="image"
-              type="file"
-              accept="image/*"
-              required
-              disabled={isDisabled}
-              onChange={(event) =>
-                onImageChange?.(event.target.files?.[0] ?? null)
-              }
-            />
-
-            {imageUrl ? (
-              <p className="text-xs text-muted-foreground">
-                Uploaded image ready.
-              </p>
-            ) : (
-              <FieldDescription>
-                Upload a clear headshot. Please wait for the upload to finish
-                before submitting.
-              </FieldDescription>
-            )}
-          </Field>
+          <FormInput
+            label="Profile Image"
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            required
+            disabled={isDisabled}
+            onChange={(event) =>
+              onImageChange?.(event.target.files?.[0] ?? null)
+            }
+            description={
+              imageUrl
+                ? 'Uploaded image ready.'
+                : 'Upload a clear headshot. Please wait for the upload to finish before submitting.'
+            }
+            descriptionClassName={imageUrl ? 'text-xs' : undefined}
+            fieldProps={{ className: 'lg:col-span-2' }}
+          />
 
           <Field className="lg:col-span-2">
             <Button type="submit" disabled={isSubmitting || isUploading}>

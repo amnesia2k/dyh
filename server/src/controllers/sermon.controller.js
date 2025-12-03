@@ -1,6 +1,7 @@
 import Sermon from "../db/models/sermon.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 /**
@@ -41,16 +42,12 @@ export const createSermon = async (req, res) => {
  */
 export const getSermons = async (req, res) => {
   try {
-    const { search } = req.query;
-    let query = {};
-
-    if (search) {
-      query.$text = { $search: search };
-    }
+    const searchFilter = buildSearchFilter(req.query, ["title", "description", "speaker"]);
+    const query = searchFilter ?? {};
 
     const sermons = await Sermon.find(query).sort({ date: -1 });
 
-    const count = await Sermon.countDocuments();
+    const count = await Sermon.countDocuments(query);
 
     logger.info(`Fetched ${sermons.length} sermons`);
     return response(res, 200, "Sermons fetched", sermons, { count });

@@ -1,5 +1,6 @@
 import { PrayerRequest } from "../db/models/pr.model.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { logger } from "../utils/logger.js";
 import { response } from "../utils/response.js";
 
@@ -30,9 +31,12 @@ export const createPR = async (req, res) => {
 
 export const getAllPRs = async (req, res) => {
   try {
+    const searchFilter = buildSearchFilter(req.query, ["fullName", "email", "message", "status"]);
+    const query = searchFilter ?? {};
+
     const [prayerRequests, totalRequests] = await Promise.all([
-      PrayerRequest.find().sort({ createdAt: -1 }),
-      PrayerRequest.countDocuments(),
+      PrayerRequest.find(query).sort({ createdAt: -1 }),
+      PrayerRequest.countDocuments(query),
     ]);
 
     logger.info(`Total Prayer Requests: ${totalRequests}`);

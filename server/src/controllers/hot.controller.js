@@ -3,11 +3,20 @@ import { generateToken } from "../utils/generate-token.js";
 import bcrypt from "bcryptjs";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
-export const getHots = async (_req, res) => {
+export const getHots = async (req, res) => {
   try {
-    const hots = await Hot.find().select("-passwordHash");
+    const searchFilter = buildSearchFilter(req.query, [
+      "name",
+      "email",
+      "tribe",
+      "bio",
+      "phone",
+      "role",
+    ]);
+    const hots = await Hot.find(searchFilter ?? {}).select("-passwordHash");
 
     return response(res, 200, "HOTs fetched successfully", hots);
   } catch (err) {

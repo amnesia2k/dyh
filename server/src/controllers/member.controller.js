@@ -1,6 +1,7 @@
 import Member from "../db/models/member.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 /**
@@ -60,7 +61,14 @@ export const createMember = async (req, res) => {
  */
 export const getAllMembers = async (req, res) => {
   try {
-    const members = await Member.find().sort({ createdAt: -1 });
+    const searchFilter = buildSearchFilter(req.query, [
+      "fullName",
+      "email",
+      "phone",
+      "address",
+      "departmentOfInterest",
+    ]);
+    const members = await Member.find(searchFilter ?? {}).sort({ createdAt: -1 });
 
     return response(res, 200, "Members fetched successfully", members, {
       count: members.length,

@@ -1,6 +1,7 @@
 import Event from "../db/models/event.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 export const createEvent = async (req, res) => {
@@ -35,16 +36,11 @@ export const createEvent = async (req, res) => {
 
 export const getEvents = async (req, res) => {
   try {
-    const { search } = req.query;
-
-    let query = {};
-
-    if (search) {
-      query.$text = { $search: search };
-    }
+    const searchFilter = buildSearchFilter(req.query, ["title", "description", "location"]);
+    const query = searchFilter ?? {};
 
     const events = await Event.find(query).sort({ date: -1 });
-    const count = await Event.countDocuments();
+    const count = await Event.countDocuments(query);
 
     logger.info(`Fetched ${events.length} events`);
 

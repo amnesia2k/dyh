@@ -1,6 +1,7 @@
 import Announcement from "../db/models/announcement.model.js";
 import { logger } from "../utils/logger.js";
 import { logActivity } from "../utils/activity.queue.js";
+import { buildSearchFilter } from "../utils/search.js";
 import { response } from "../utils/response.js";
 
 export const createAnnouncement = async (req, res) => {
@@ -34,16 +35,11 @@ export const createAnnouncement = async (req, res) => {
 
 export const getAnnouncements = async (req, res) => {
   try {
-    const { search } = req.query;
-
-    let query = {};
-
-    if (search) {
-      query.$text = { $search: search };
-    }
+    const searchFilter = buildSearchFilter(req.query, ["title", "summary", "body"]);
+    const query = searchFilter ?? {};
 
     const announcements = await Announcement.find(query).sort({ date: -1 });
-    const count = await Announcement.countDocuments();
+    const count = await Announcement.countDocuments(query);
 
     logger.info(`Fetched ${announcements.length} announcements`);
 

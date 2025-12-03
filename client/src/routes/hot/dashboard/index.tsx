@@ -104,8 +104,8 @@ function RouteComponent() {
             {activities.length ? (
               activities
                 .slice(0, ACTIVITY_LIMIT)
-                .map((activity) => (
-                  <ActivityItem key={activity._id} activity={activity} />
+                .map((activity, idx) => (
+                  <ActivityItem key={activity._id || idx} activity={activity} />
                 ))
             ) : (
               <p className="text-sm text-muted-foreground">

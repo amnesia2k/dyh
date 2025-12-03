@@ -1,5 +1,6 @@
 import type { ActivityLog } from '@/hooks/api/types'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { formatAction, formatRelativeTime } from '@/utils/helpers'
 
 export function ActivityItem({ activity }: { activity: ActivityLog }) {
@@ -21,14 +22,14 @@ export function ActivityItem({ activity }: { activity: ActivityLog }) {
           {formatRelativeTime(activity.createdAt)}
         </p>
       </div>
-      <div
+      <Badge
         className={cn(
-          'rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-tight',
+          'text-[11px] font-semibold uppercase tracking-tight',
           badgeClass,
         )}
       >
         {activity.type}
-      </div>
+      </Badge>
     </div>
   )
 }

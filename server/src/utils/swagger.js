@@ -101,7 +101,11 @@ const swaggerDefinition = {
           bio: { type: "string" },
           imageUrl: { type: "string" },
           phone: { type: "string" },
-          role: { type: "string", description: "Role of the HOT (e.g., admin)" },
+          role: {
+            type: "string",
+            description: "Role of the HOT (admin, hot, or past-hot)",
+            enum: ["admin", "hot", "past-hot"],
+          },
         },
       },
       TestimonyUpdate: {

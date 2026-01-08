@@ -6,7 +6,7 @@ import {
   getAnnouncements,
   updateAnnouncement,
 } from "../controllers/announcement.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import {
   validateCreateAnnouncement,
   validateUpdateAnnouncement,
@@ -19,7 +19,7 @@ const router = Router();
  * /announcement:
  *   get:
  *     summary: Get all announcements
- *     description: Returns all announcements, ordered by date (newest first).
+ *     description: Returns all announcements, ordered by date (newest first). Requires authentication (past-hot, hot, or admin).
  *     tags:
  *       - Announcements
  *     parameters:
@@ -28,10 +28,15 @@ const router = Router();
  *         schema:
  *           type: string
  *         description: Full-text search term.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Announcements fetched successfully.
  */
+router.use(verifyToken);
+
 router.get("/", getAnnouncements);
 
 /**
@@ -39,7 +44,7 @@ router.get("/", getAnnouncements);
  * /announcement/{id}:
  *   get:
  *     summary: Get a single announcement
- *     description: Fetch a single announcement by its ID.
+ *     description: Fetch a single announcement by its ID (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Announcements
  *     parameters:
@@ -49,6 +54,9 @@ router.get("/", getAnnouncements);
  *         schema:
  *           type: string
  *         description: Announcement ID.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Announcement fetched successfully.
@@ -57,12 +65,14 @@ router.get("/", getAnnouncements);
  */
 router.get("/:id", getAnnouncementById);
 
+router.use(verifyHotToken);
+
 /**
  * @openapi
  * /announcement:
  *   post:
  *     summary: Create a new announcement
- *     description: Create a new announcement (protected route).
+ *     description: Create a new announcement (HOT or admin).
  *     tags:
  *       - Announcements
  *     security:
@@ -94,14 +104,14 @@ router.get("/:id", getAnnouncementById);
  *       201:
  *         description: Announcement created successfully.
  */
-router.post("/", protectRoute, validateCreateAnnouncement, createAnnouncement);
+router.post("/", validateCreateAnnouncement, createAnnouncement);
 
 /**
  * @openapi
  * /announcement/{id}:
  *   patch:
  *     summary: Update an announcement
- *     description: Update fields of an existing announcement (protected route).
+ *     description: Update fields of an existing announcement (HOT or admin).
  *     tags:
  *       - Announcements
  *     security:
@@ -126,14 +136,16 @@ router.post("/", protectRoute, validateCreateAnnouncement, createAnnouncement);
  *       404:
  *         description: Announcement not found.
  */
-router.patch("/:id", protectRoute, validateUpdateAnnouncement, updateAnnouncement);
+router.patch("/:id", validateUpdateAnnouncement, updateAnnouncement);
+
+router.use(verifyAdminToken);
 
 /**
  * @openapi
  * /announcement/{id}:
  *   delete:
  *     summary: Delete an announcement
- *     description: Delete an announcement by ID (protected route).
+ *     description: Delete an announcement by ID (admin only).
  *     tags:
  *       - Announcements
  *     security:
@@ -152,6 +164,6 @@ router.patch("/:id", protectRoute, validateUpdateAnnouncement, updateAnnouncemen
  *       404:
  *         description: Announcement not found.
  */
-router.delete("/:id", protectRoute, deleteAnnouncement);
+router.delete("/:id", deleteAnnouncement);
 
 export default router;

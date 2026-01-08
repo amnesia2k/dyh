@@ -60,7 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
         <script async src="//www.instagram.com/embed.js"></script>
       </head>
-      <body>
+      <body className="selection:bg-primary selection:text-white">
         {children}
         <Analytics />
         <Toaster position="bottom-right" />

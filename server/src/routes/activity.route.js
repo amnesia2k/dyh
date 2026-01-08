@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getAllActivities } from "../controllers/activity.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -9,7 +9,7 @@ const router = Router();
  * /activity:
  *   get:
  *     summary: Get recent activities
- *     description: Returns the activity log, ordered by creation date (newest first). Useful for recent activity feeds in the frontend.
+ *     description: Returns the activity log, ordered by creation date (newest first). Requires authentication (past-hot, hot, or admin) and is useful for recent activity feeds in the frontend.
  *     tags:
  *       - Activity
  *     security:
@@ -19,6 +19,8 @@ const router = Router();
  *       200:
  *         description: Activities fetched successfully.
  */
-router.get("/", protectRoute, getAllActivities);
+router.use(verifyToken);
+
+router.get("/", getAllActivities);
 
 export default router;

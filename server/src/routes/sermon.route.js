@@ -6,7 +6,7 @@ import {
   getSermons,
   updateSermon,
 } from "../controllers/sermon.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { validateCreateSermon, validateUpdateSermon } from "../utils/validate-schema.js";
 
 const router = Router();
@@ -16,7 +16,7 @@ const router = Router();
  * /sermon:
  *   get:
  *     summary: Get all sermons
- *     description: Returns all sermons, optionally filtered by a search term.
+ *     description: Returns all sermons, optionally filtered by a search term (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Sermons
  *     parameters:
@@ -25,10 +25,15 @@ const router = Router();
  *         schema:
  *           type: string
  *         description: Full-text search term.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Sermons fetched successfully.
  */
+router.use(verifyToken);
+
 router.get("/", getSermons);
 
 /**
@@ -36,7 +41,7 @@ router.get("/", getSermons);
  * /sermon/{id}:
  *   get:
  *     summary: Get a single sermon
- *     description: Fetch a single sermon by its ID.
+ *     description: Fetch a single sermon by its ID (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Sermons
  *     parameters:
@@ -46,6 +51,9 @@ router.get("/", getSermons);
  *         schema:
  *           type: string
  *         description: Sermon ID.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Sermon fetched successfully.
@@ -54,12 +62,14 @@ router.get("/", getSermons);
  */
 router.get("/:id", getSermonById);
 
+router.use(verifyHotToken);
+
 /**
  * @openapi
  * /sermon:
  *   post:
  *     summary: Create a new sermon
- *     description: Create a new sermon entry (protected route).
+ *     description: Create a new sermon entry (HOT or admin).
  *     tags:
  *       - Sermons
  *     security:
@@ -92,14 +102,14 @@ router.get("/:id", getSermonById);
  *       400:
  *         description: Validation error.
  */
-router.post("/", protectRoute, validateCreateSermon, createSermon);
+router.post("/", validateCreateSermon, createSermon);
 
 /**
  * @openapi
  * /sermon/{id}:
  *   patch:
  *     summary: Update a sermon
- *     description: Update fields of an existing sermon (protected route).
+ *     description: Update fields of an existing sermon (HOT or admin).
  *     tags:
  *       - Sermons
  *     security:
@@ -124,14 +134,16 @@ router.post("/", protectRoute, validateCreateSermon, createSermon);
  *       404:
  *         description: Sermon not found.
  */
-router.patch("/:id", protectRoute, validateUpdateSermon, updateSermon);
+router.patch("/:id", validateUpdateSermon, updateSermon);
+
+router.use(verifyAdminToken);
 
 /**
  * @openapi
  * /sermon/{id}:
  *   delete:
  *     summary: Delete a sermon
- *     description: Delete a sermon by ID (protected route).
+ *     description: Delete a sermon by ID (admin only).
  *     tags:
  *       - Sermons
  *     security:
@@ -150,6 +162,6 @@ router.patch("/:id", protectRoute, validateUpdateSermon, updateSermon);
  *       404:
  *         description: Sermon not found.
  */
-router.delete("/:id", protectRoute, deleteSermon);
+router.delete("/:id", deleteSermon);
 
 export default router;

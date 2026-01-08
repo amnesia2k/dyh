@@ -1,10 +1,12 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import type { Member } from '@/hooks/api/types'
+import { MemberCard } from '@/components/member-card'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { membersQueryOptions } from '@/hooks/dal/members'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { MemberDetailsModal } from '@/components/member-details-modal'
+import { EmptyState } from '@/components/empty-state'
 
 export const Route = createFileRoute('/hot/dashboard/all-members')({
   validateSearch: (search) => ({
@@ -22,10 +24,11 @@ export const Route = createFileRoute('/hot/dashboard/all-members')({
 })
 
 function RouteComponent() {
-  const { members, count } = useLoaderData({ from: Route.id })
+  const { members } = useLoaderData({ from: Route.id })
   const navigate = Route.useNavigate()
   const searchState = Route.useSearch()
   const [searchInput, setSearchInput] = useState(searchState.search ?? '')
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const debouncedSearch = useDebouncedValue(searchInput, 350)
 
   useEffect(() => {
@@ -45,13 +48,11 @@ function RouteComponent() {
   }, [debouncedSearch, navigate])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold">Members</h1>
-          <p className="text-sm text-muted-foreground">
-            Search across name, email, phone or department.
-          </p>
+          <p className="text-sm text-muted-foreground">Manage Church members</p>
         </div>
         <div className="flex w-full items-center gap-3 sm:max-w-sm">
           <Input
@@ -60,45 +61,29 @@ function RouteComponent() {
             placeholder="Search members..."
             className="h-10"
           />
-          {/* <span className="text-xs text-muted-foreground">{count} found</span> */}
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {members.length ? (
           members.map((member: Member) => (
-            <Card
+            <MemberCard
               key={member._id}
-              className="border-border/70 bg-card/80 shadow-[0_6px_24px_rgba(0,0,0,0.05)]"
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">
-                  {member.fullName || 'Unnamed member'}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {member.email || 'No email'} · {member.phone || 'No phone'}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-1 text-sm text-muted-foreground">
-                {member.departmentOfInterest && (
-                  <p>Department: {member.departmentOfInterest}</p>
-                )}
-                {member.address && <p>Address: {member.address}</p>}
-              </CardContent>
-            </Card>
+              member={member}
+              onSelect={setSelectedMember}
+            />
           ))
         ) : (
           <EmptyState message="No members match this search yet." />
         )}
       </div>
-    </div>
-  )
-}
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border/80 bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-      {message}
+      {selectedMember ? (
+        <MemberDetailsModal
+          member={selectedMember}
+          onClose={() => setSelectedMember(null)}
+        />
+      ) : null}
     </div>
   )
 }

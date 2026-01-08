@@ -1,9 +1,9 @@
-import { verifyToken } from "../utils/generate-token.js";
+import { verifyToken as verifyJwtToken } from "../utils/generate-token.js";
 import Hot from "../db/models/hot.model.js";
 import { logger } from "../utils/logger.js";
 import { response } from "../utils/response.js";
 
-export async function protectRoute(req, res, next) {
+export async function verifyToken(req, res, next) {
   try {
     // Accept token from cookies or Authorization header (Bearer scheme).
     // Split by spaces so it works even if Swagger/UI prefixes "Bearer " automatically
@@ -16,16 +16,16 @@ export async function protectRoute(req, res, next) {
 
     let decoded;
     try {
-      decoded = verifyToken(token);
-      logger.info("protectRoute: decoded token:", decoded);
+      decoded = verifyJwtToken(token);
+      logger.info("verifyToken: decoded token:", decoded);
     } catch (err) {
-      logger.error("protectRoute: token verification failed", err);
+      logger.error("verifyToken: token verification failed", err);
       return response(res, 401, "Invalid or expired token");
     }
 
     // Load the HOT by decoded._id
     const user = await Hot.findById(decoded._id).select("-passwordHash");
-    logger.info("protectRoute: hot lookup result:", user);
+    logger.info("verifyToken: hot lookup result:", user);
 
     if (!user) {
       return response(res, 401, "User not found");
@@ -34,12 +34,24 @@ export async function protectRoute(req, res, next) {
     req.user = user;
     next();
   } catch (err) {
-    logger.error("❌ protectRoute error:", err);
+    logger.error("❌ verifyToken error:", err);
     return response(res, 500, "Internal server error");
   }
 }
 
-export function adminGuard(req, res, next) {
+export function verifyHotToken(req, res, next) {
+  if (!req.user) {
+    return response(res, 401, "Unauthorized: No user context found");
+  }
+
+  if (!["hot", "admin"].includes(req.user.role)) {
+    return response(res, 403, "Forbidden: HOT or admin role required");
+  }
+
+  next();
+}
+
+export function verifyAdminToken(req, res, next) {
   if (!req.user) {
     return response(res, 401, "Unauthorized: No user context found");
   }

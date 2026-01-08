@@ -6,7 +6,7 @@ import {
   getSingleMember,
   updateMember,
 } from "../controllers/member.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { validateCreateMember, validateUpdateMember } from "../utils/validate-schema.js";
 
 const router = Router();
@@ -16,7 +16,7 @@ const router = Router();
  * /member:
  *   get:
  *     summary: Get all members
- *     description: Returns a list of all members, ordered by creation date (newest first).
+ *     description: Returns a list of all members, ordered by creation date (newest first). Requires authentication (past-hot, hot, or admin).
  *     tags:
  *       - Members
  *     security:
@@ -26,14 +26,16 @@ const router = Router();
  *       200:
  *         description: Members fetched successfully.
  */
-router.get("/", protectRoute, getAllMembers);
+router.use(verifyToken);
+
+router.get("/", getAllMembers);
 
 /**
  * @openapi
  * /member/{id}:
  *   get:
  *     summary: Get a single member
- *     description: Fetch a single member by its ID.
+ *     description: Fetch a single member by its ID (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Members
  *     security:
@@ -52,16 +54,21 @@ router.get("/", protectRoute, getAllMembers);
  *       404:
  *         description: Member not found.
  */
-router.get("/:id", protectRoute, getSingleMember);
+router.get("/:id", getSingleMember);
+
+router.use(verifyHotToken);
 
 /**
  * @openapi
  * /member:
  *   post:
  *     summary: Create a new member
- *     description: Register a new member in the system.
+ *     description: Register a new member in the system (HOT or admin).
  *     tags:
  *       - Members
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -104,7 +111,7 @@ router.post("/", validateCreateMember, createMember);
  * /member/{id}:
  *   patch:
  *     summary: Update a member
- *     description: Update fields of an existing member.
+ *     description: Update fields of an existing member (HOT or admin).
  *     tags:
  *       - Members
  *     security:
@@ -131,12 +138,14 @@ router.post("/", validateCreateMember, createMember);
  */
 router.patch("/:id", validateUpdateMember, updateMember);
 
+router.use(verifyAdminToken);
+
 /**
  * @openapi
  * /member/{id}:
  *   delete:
  *     summary: Delete a member
- *     description: Permanently delete a member by its ID.
+ *     description: Permanently delete a member by its ID (admin only).
  *     tags:
  *       - Members
  *     security:
@@ -155,6 +164,6 @@ router.patch("/:id", validateUpdateMember, updateMember);
  *       404:
  *         description: Member not found.
  */
-router.delete("/:id", protectRoute, deleteMember);
+router.delete("/:id", deleteMember);
 
 export default router;

@@ -6,47 +6,10 @@ import {
   getTestimonyById,
   updateTestimony,
 } from "../controllers/testimony.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { validateCreateTestimony, validateUpdateTestimony } from "../utils/validate-schema.js";
 
 const router = Router();
-
-/**
- * @openapi
- * /testimony:
- *   get:
- *     summary: Get all testimonies
- *     description: Returns all testimonies, ordered by creation date (newest first).
- *     tags:
- *       - Testimonies
- *     responses:
- *       200:
- *         description: Testimonies fetched successfully.
- */
-router.get("/", getTestimonies);
-
-/**
- * @openapi
- * /testimony/{id}:
- *   get:
- *     summary: Get a single testimony
- *     description: Fetch a single testimony by its ID.
- *     tags:
- *       - Testimonies
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Testimony ID.
- *     responses:
- *       200:
- *         description: Testimony fetched successfully.
- *       404:
- *         description: Testimony not found.
- */
-router.get("/:id", getTestimonyById);
 
 /**
  * @openapi
@@ -84,12 +47,59 @@ router.get("/:id", getTestimonyById);
  */
 router.post("/", validateCreateTestimony, createTestimony);
 
+router.use(verifyToken);
+
+/**
+ * @openapi
+ * /testimony:
+ *   get:
+ *     summary: Get all testimonies
+ *     description: Returns all testimonies, ordered by creation date (newest first). Requires authentication (past-hot, hot, or admin).
+ *     tags:
+ *       - Testimonies
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Testimonies fetched successfully.
+ */
+router.get("/", getTestimonies);
+
+/**
+ * @openapi
+ * /testimony/{id}:
+ *   get:
+ *     summary: Get a single testimony
+ *     description: Fetch a single testimony by its ID (requires authenticated role: past-hot, hot, or admin).
+ *     tags:
+ *       - Testimonies
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Testimony ID.
+ *     responses:
+ *       200:
+ *         description: Testimony fetched successfully.
+ *       404:
+ *         description: Testimony not found.
+ */
+router.get("/:id", getTestimonyById);
+
+router.use(verifyHotToken);
+
 /**
  * @openapi
  * /testimony/{id}:
  *   patch:
  *     summary: Update a testimony
- *     description: Update the status, approval, or featured flag of a testimony (protected route).
+ *     description: Update the status, approval, or featured flag of a testimony (HOT or admin).
  *     tags:
  *       - Testimonies
  *     security:
@@ -114,14 +124,16 @@ router.post("/", validateCreateTestimony, createTestimony);
  *       404:
  *         description: Testimony not found.
  */
-router.patch("/:id", protectRoute, validateUpdateTestimony, updateTestimony);
+router.patch("/:id", validateUpdateTestimony, updateTestimony);
+
+router.use(verifyAdminToken);
 
 /**
  * @openapi
  * /testimony/{id}:
  *   delete:
  *     summary: Delete a testimony
- *     description: Delete a testimony by ID (protected route).
+ *     description: Delete a testimony by ID (admin only).
  *     tags:
  *       - Testimonies
  *     security:
@@ -140,6 +152,6 @@ router.patch("/:id", protectRoute, validateUpdateTestimony, updateTestimony);
  *       404:
  *         description: Testimony not found.
  */
-router.delete("/:id", protectRoute, deleteTestimony);
+router.delete("/:id", deleteTestimony);
 
 export default router;

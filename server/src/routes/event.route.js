@@ -6,7 +6,7 @@ import {
   getEvents,
   updateEvent,
 } from "../controllers/event.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { validateCreateEvent, validateUpdateEvent } from "../utils/validate-schema.js";
 
 const router = Router();
@@ -16,7 +16,7 @@ const router = Router();
  * /event:
  *   get:
  *     summary: Get all events
- *     description: Returns all events, optionally searchable via text search.
+ *     description: Returns all events, optionally searchable via text search (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Events
  *     parameters:
@@ -25,10 +25,15 @@ const router = Router();
  *         schema:
  *           type: string
  *         description: Full-text search term.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Events fetched successfully.
  */
+router.use(verifyToken);
+
 router.get("/", getEvents);
 
 /**
@@ -36,7 +41,7 @@ router.get("/", getEvents);
  * /event/{id}:
  *   get:
  *     summary: Get a single event
- *     description: Fetch a single event by its ID.
+ *     description: Fetch a single event by its ID (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Events
  *     parameters:
@@ -46,6 +51,9 @@ router.get("/", getEvents);
  *         schema:
  *           type: string
  *         description: Event ID.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Event fetched successfully.
@@ -54,12 +62,14 @@ router.get("/", getEvents);
  */
 router.get("/:id", getEventById);
 
+router.use(verifyHotToken);
+
 /**
  * @openapi
  * /event:
  *   post:
  *     summary: Create a new event
- *     description: Create a new event (protected route).
+ *     description: Create a new event (HOT or admin).
  *     tags:
  *       - Events
  *     security:
@@ -93,14 +103,14 @@ router.get("/:id", getEventById);
  *       201:
  *         description: Event created successfully.
  */
-router.post("/", protectRoute, validateCreateEvent, createEvent);
+router.post("/", validateCreateEvent, createEvent);
 
 /**
  * @openapi
  * /event/{id}:
  *   patch:
  *     summary: Update an event
- *     description: Update fields of an existing event (protected route).
+ *     description: Update fields of an existing event (HOT or admin).
  *     tags:
  *       - Events
  *     security:
@@ -125,14 +135,16 @@ router.post("/", protectRoute, validateCreateEvent, createEvent);
  *       404:
  *         description: Event not found.
  */
-router.patch("/:id", protectRoute, validateUpdateEvent, updateEvent);
+router.patch("/:id", validateUpdateEvent, updateEvent);
+
+router.use(verifyAdminToken);
 
 /**
  * @openapi
  * /event/{id}:
  *   delete:
  *     summary: Delete an event
- *     description: Delete an event by ID (protected route).
+ *     description: Delete an event by ID (admin only).
  *     tags:
  *       - Events
  *     security:
@@ -151,6 +163,6 @@ router.patch("/:id", protectRoute, validateUpdateEvent, updateEvent);
  *       404:
  *         description: Event not found.
  */
-router.delete("/:id", protectRoute, deleteEvent);
+router.delete("/:id", deleteEvent);
 
 export default router;

@@ -9,66 +9,10 @@ import {
   registerHot,
   updateHot,
 } from "../controllers/hot.controller.js";
-import { adminGuard, protectRoute } from "../middleware/auth.middleware.js";
+import { verifyAdminToken, verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { validateLogin, validateRegister, validateUpdate } from "../utils/validate-schema.js";
 
 const router = Router();
-
-/**
- * @openapi
- * /hot/me:
- *   get:
- *     summary: Get current HOT profile
- *     description: Returns the currently authenticated HOT user (based on cookie or Bearer token).
- *     tags:
- *       - HOT
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Current HOT fetched successfully.
- *       401:
- *         description: Unauthorized.
- */
-router.get("/me", protectRoute, getCurrentHot);
-
-/**
- * @openapi
- * /hot:
- *   get:
- *     summary: Get all HOTs
- *     description: Returns a list of all HOT users.
- *     tags:
- *       - HOT
- *     responses:
- *       200:
- *         description: HOTs fetched successfully.
- */
-router.get("/", getHots);
-
-/**
- * @openapi
- * /hot/{id}:
- *   get:
- *     summary: Get a single HOT
- *     description: Fetch a single HOT profile by ID.
- *     tags:
- *       - HOT
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: HOT ID.
- *     responses:
- *       200:
- *         description: HOT fetched successfully.
- *       404:
- *         description: HOT not found.
- */
-router.get("/:id", getSingleHot);
 
 /**
  * @openapi
@@ -144,12 +88,76 @@ router.post("/register", validateRegister, registerHot);
  */
 router.post("/login", validateLogin, loginHot);
 
+router.use(verifyToken);
+
+/**
+ * @openapi
+ * /hot/me:
+ *   get:
+ *     summary: Get current HOT profile
+ *     description: Returns the currently authenticated HOT user (based on cookie or Bearer token). Requires authentication (past-hot, hot, or admin).
+ *     tags:
+ *       - HOT
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current HOT fetched successfully.
+ *       401:
+ *         description: Unauthorized.
+ */
+router.get("/me", getCurrentHot);
+
+/**
+ * @openapi
+ * /hot:
+ *   get:
+ *     summary: Get all HOTs
+ *     description: Returns a list of all HOT users (requires authenticated role: past-hot, hot, or admin).
+ *     tags:
+ *       - HOT
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: HOTs fetched successfully.
+ */
+router.get("/", getHots);
+
+/**
+ * @openapi
+ * /hot/{id}:
+ *   get:
+ *     summary: Get a single HOT
+ *     description: Fetch a single HOT profile by ID (requires authenticated role: past-hot, hot, or admin).
+ *     tags:
+ *       - HOT
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: HOT ID.
+ *     responses:
+ *       200:
+ *         description: HOT fetched successfully.
+ *       404:
+ *         description: HOT not found.
+ */
+router.get("/:id", getSingleHot);
+
 /**
  * @openapi
  * /hot/logout:
  *   post:
  *     summary: Logout current HOT
- *     description: Clears the authentication cookie for the current HOT (if using cookie auth).
+ *     description: Clears the authentication cookie for the current HOT (if using cookie auth). Requires authentication.
  *     tags:
  *       - HOT
  *     security:
@@ -159,14 +167,14 @@ router.post("/login", validateLogin, loginHot);
  *       200:
  *         description: Logout successful.
  */
-router.post("/logout", protectRoute, logoutHot);
+router.post("/logout", logoutHot);
 
 /**
  * @openapi
  * /hot/{id}:
  *   patch:
  *     summary: Update a HOT
- *     description: Update HOT profile details (protected route).
+ *     description: Update HOT profile details (HOT or admin).
  *     tags:
  *       - HOT
  *     security:
@@ -191,7 +199,9 @@ router.post("/logout", protectRoute, logoutHot);
  *       404:
  *         description: HOT not found.
  */
-router.patch("/:id", protectRoute, validateUpdate, updateHot);
+router.use(verifyHotToken);
+
+router.patch("/:id", validateUpdate, updateHot);
 
 /**
  * @openapi
@@ -218,6 +228,8 @@ router.patch("/:id", protectRoute, validateUpdate, updateHot);
  *       404:
  *         description: HOT not found.
  */
-router.delete("/:id", protectRoute, adminGuard, deleteHot);
+router.use(verifyAdminToken);
+
+router.delete("/:id", deleteHot);
 
 export default router;

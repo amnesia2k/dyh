@@ -924,7 +924,7 @@ No payload required.
 #### DELETE /hot/:id
 
 **Overview**: Deletes a Head of Tribe (HoT) profile by ID. Requires administrator privileges.
-**Security**: `cookieAuth` (JWT token in cookie or `Authorization: Bearer` header), `adminGuard`
+**Security**: `cookieAuth` (JWT token in cookie or `Authorization: Bearer` header), `verifyAdminToken`
 **Request**:
 
 ```

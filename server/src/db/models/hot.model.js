@@ -42,7 +42,7 @@ const HotSchema = new Schema(
 
     role: {
       type: String,
-      enum: ["admin", "hot"],
+      enum: ["admin", "hot", "past-hot"],
       default: "hot",
     },
 

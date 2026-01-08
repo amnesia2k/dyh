@@ -43,3 +43,27 @@ export function formatEventDateTime(date: Date | null) {
 
   return `${datePart} at ${timePart}`
 }
+
+export function getInitials(name?: string) {
+  if (!name) return 'NA'
+  const [first, second] = name.split(' ').filter(Boolean)
+  const firstInitial = first[0] || ''
+  const secondInitial = second[0] || ''
+  const result = (firstInitial + secondInitial).trim()
+  return result ? result.toUpperCase() : firstInitial.toUpperCase() || 'NA'
+}
+
+export function formatDateLabel(
+  value?: string,
+  options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' },
+) {
+  if (!value) return undefined
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', options).format(parsed)
+}
+
+export function formatTribeName(value?: string) {
+  if (!value) return ''
+  return formatAction(value)
+}

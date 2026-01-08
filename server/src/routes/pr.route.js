@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validateCreatePr, validateUpdatePr } from "../utils/validate-schema.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { verifyHotToken, verifyToken } from "../middleware/auth.middleware.js";
 import { createPR, getAllPRs, getSinglePR, updatePRStatus } from "../controllers/pr.controller.js";
 
 const router = Router();
@@ -44,13 +44,18 @@ router.post("/", validateCreatePr, createPR);
  * /prayer-request:
  *   get:
  *     summary: Get all prayer requests
- *     description: Returns all prayer requests (typically for admin/HOT dashboards).
+ *     description: Returns all prayer requests (requires authenticated role: past-hot, hot, or admin; typically for dashboards).
  *     tags:
  *       - Prayer Requests
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Prayer requests fetched successfully.
  */
+router.use(verifyToken);
+
 router.get("/", getAllPRs);
 
 /**
@@ -58,7 +63,7 @@ router.get("/", getAllPRs);
  * /prayer-request/{id}:
  *   get:
  *     summary: Get a single prayer request
- *     description: Fetch a single prayer request by its ID.
+ *     description: Fetch a single prayer request by its ID (requires authenticated role: past-hot, hot, or admin).
  *     tags:
  *       - Prayer Requests
  *     parameters:
@@ -68,6 +73,9 @@ router.get("/", getAllPRs);
  *         schema:
  *           type: string
  *         description: Prayer request ID.
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Prayer request fetched successfully.
@@ -76,12 +84,14 @@ router.get("/", getAllPRs);
  */
 router.get("/:id", getSinglePR);
 
+router.use(verifyHotToken);
+
 /**
  * @openapi
  * /prayer-request/{id}:
  *   patch:
  *     summary: Update a prayer request
- *     description: Update the status or details of a prayer request (protected route).
+ *     description: Update the status or details of a prayer request (HOT or admin).
  *     tags:
  *       - Prayer Requests
  *     security:
@@ -106,6 +116,6 @@ router.get("/:id", getSinglePR);
  *       404:
  *         description: Prayer request not found.
  */
-router.patch("/:id", protectRoute, validateUpdatePr, updatePRStatus);
+router.patch("/:id", validateUpdatePr, updatePRStatus);
 
 export default router;
